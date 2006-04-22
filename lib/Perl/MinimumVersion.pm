@@ -488,7 +488,7 @@ sub _self {
 
 # Find the maximum version, ignoring problems
 sub _max {
-	defined $_[0] and $_[0] eq PMV and shift;
+	defined $_[0] and "$_[0]" eq PMV and shift;
 	my @valid = grep { _INSTANCE($_, 'version') } @_;
 	my $max   = List::Util::max @valid;
 	$max ? $max : '';
