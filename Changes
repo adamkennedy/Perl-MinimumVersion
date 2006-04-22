@@ -1,0 +1,42 @@
+Revision history for Perl extension Perl::MinimumVersion
+
+0.13 Sat 22 Apr 2006
+	- No functional changes
+	- Moved over from SourceForge CVS to new collaborative SVN repository
+	- Upgraded to Module::Install 0.62
+
+0.12 Fri Dec 30 2005
+	- Removed some Perl 5.8isms and coded one back in as a rule :)
+	- Upgraded to newer Module::Install
+	- Pushed version deps on some critical things
+
+0.11 Thu Nov 10 2005
+	- Added missing File::Find::Rule dependency
+
+0.10 Thu Oct  6 2005
+	- Fixed utf8 pragma
+	- Switched from qv() to version->new()  due to bugs
+	- Please ignore perlver for now :)
+	- Updated dependencies to cover recent bugs and changes
+
+0.09_01 Mon Sep 12 2005
+	- Added the perlver application
+	- Added some more minor optimisation
+
+0.05 Sun Sep  4 2005
+	- Added support for explicit versions
+	- Added minimum_syntax_version method
+	- Added minimum_explicit_version method
+	- Updated PPI dependency to 1.000
+
+0.04 Tue May 31 2005
+	- Added another chunk of checking methods
+
+0.03 Wed May 25 2005
+	- Updated to handle API change at PPI 0.990
+
+0.02 Mon Apr 25 2005
+	- Added tests for attributes, utf8 and a few other pragmas
+
+0.01 Wed Apr 20 2005
+	- Created the initial implementation
