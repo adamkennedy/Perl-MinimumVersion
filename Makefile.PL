@@ -14,5 +14,4 @@ build_requires 'Test::More'       => '0.47';
 build_requires 'File::Spec'       => '0.80';
 install_script 'bin/perlver';
 
-auto_install;
 WriteAll;
