@@ -376,7 +376,8 @@ sub _pragma_utf8 {
 	shift->Document->find_any( sub {
 		$_[1]->isa('PPI::Statement::Include')
 		and
-		$_[1]->pragma eq 'utf8'
+		$_[1]->module eq 'utf8'
+		# This used to be pragma(), but that was buggy in PPI v1.118
 	} );
 }
 
