@@ -3,34 +3,24 @@
 # Main testing for Perl::MinimumVersion
 
 use strict;
-use lib ();
-use File::Spec::Functions ':ALL';
 BEGIN {
-	$| = 1;
-	unless ( $ENV{HARNESS_ACTIVE} ) {
-		require FindBin;
-		$FindBin::Bin = $FindBin::Bin; # Avoid a warning
-		chdir catdir( $FindBin::Bin, updir() );
-		lib->import(
-			catdir('blib', 'arch'),
-			catdir('blib', 'lib' ),
-			catdir('lib'),
-			);
-	}
+	$|  = 1;
+	$^W = 1;
 }
 
-use Test::More tests => 46;
+use Test::More tests => 52;
 use version;
+use File::Spec::Functions ':ALL';
 use PPI;
 use Perl::MinimumVersion 'PMV';
 
 sub version_is {
 	my $Document = PPI::Document->new( \$_[0] );
 	isa_ok( $Document, 'PPI::Document' );
-	my $Version = Perl::MinimumVersion->new( $Document );
-	isa_ok( $Version, 'Perl::MinimumVersion' );
-	is( $Version->minimum_version, $_[1], $_[2] || 'Version matches expected' );
-	$Version;
+	my $v = Perl::MinimumVersion->new( $Document );
+	isa_ok( $v, 'Perl::MinimumVersion' );
+	is( $v->minimum_version, $_[1], $_[2] || 'Version matches expected' );
+	$v;
 }
 
 
@@ -104,10 +94,10 @@ is_deeply( PMV->_max(version->new(5.006), version->new(5.8.4), undef, version->n
 	'_max(three) returns the higher version (as method)' );
 
 # Constructor testing
-{
-	my $Version = Perl::MinimumVersion->new( \'print "Hello World!\n";' );
-	isa_ok( $Version, 'Perl::MinimumVersion' );
-	$Version = Perl::MinimumVersion->new( catfile( 't', '02_main.t' ) );
+SCOPE: {
+	my $v = Perl::MinimumVersion->new( \'print "Hello World!\n";' );
+	isa_ok( $v, 'Perl::MinimumVersion' );
+	$v = Perl::MinimumVersion->new( catfile( 't', '02_main.t' ) );
 	# version_is tests the final method
 
 	# Bad things
@@ -116,36 +106,36 @@ is_deeply( PMV->_max(version->new(5.006), version->new(5.8.4), undef, version->n
 	}
 }
 
-{
-my $Version = version_is( <<'END_PERL', '5.004', 'Hello World matches expected version' );
+SCOPE: {
+my $v = version_is( <<'END_PERL', '5.004', 'Hello World matches expected version' );
 print "Hello World!\n";
 END_PERL
-is( $Version->_any_our_variables, '', '->_any_our_variables returns false' );
+is( $v->_any_our_variables, '', '->_any_our_variables returns false' );
 
 # This first time, lets double check some assumptions
-isa_ok( $Version->Document, 'PPI::Document'  );
-isa_ok( $Version->minimum_version, 'version' );
+isa_ok( $v->Document, 'PPI::Document'  );
+isa_ok( $v->minimum_version, 'version' );
 }
 
 # Try one with an 'our' in it
-{
-my $Version = version_is( <<'END_PERL', '5.006', '"our" matches expected version' );
+SCOPE: {
+my $v = version_is( <<'END_PERL', '5.006', '"our" matches expected version' );
 our $foo = 'bar';
 END_PERL
-is( $Version->_any_our_variables, 1, '->_any_our_variables returns true' );
+is( $v->_any_our_variables, 1, '->_any_our_variables returns true' );
 }
 
 # Try with attributes
-{
-my $Version = version_is( <<'END_PERL', '5.006', '"attributes" matches expected version' );
+SCOPE: {
+my $v = version_is( <<'END_PERL', '5.006', '"attributes" matches expected version' );
 sub foo : attribute { 1 };
 END_PERL
-is( $Version->_any_attributes, 1, '->_any_attributes returns true' );
+is( $v->_any_attributes, 1, '->_any_attributes returns true' );
 }
 
 # Check with a complex explicit
-{
-my $Version = version_is( <<'END_PERL', '5.008', 'explicit versions are detected' );
+SCOPE: {
+my $v = version_is( <<'END_PERL', '5.008', 'explicit versions are detected' );
 sub foo : attribute { 1 };
 require 5.006;
 use 5.008;
@@ -153,17 +143,37 @@ END_PERL
 }
 
 # Check with syntax higher than explicit
-{
-my $Version = version_is( <<'END_PERL', '5.006', 'Used syntax higher than low explicit' );
+SCOPE: {
+my $v = version_is( <<'END_PERL', '5.006', 'Used syntax higher than low explicit' );
 sub foo : attribute { 1 };
 require 5.005;
 END_PERL
 }
 
 # Regression bug: utf8 mispelled
-{
-my $Version = version_is( <<'END_PERL', '5.008', 'utf8 module makes the version 5.008' );
+SCOPE: {
+my $v = version_is( <<'END_PERL', '5.008', 'utf8 module makes the version 5.008' );
 use utf8;
+1;
+END_PERL
+}
+
+# Check the use of constant hashes
+SCOPE: {
+my $v = version_is( <<'END_PERL', '5.008', 'constant hash adds a 5.008 dep' );
+use constant {
+	FOO => 1,
+};
+1;
+END_PERL
+}
+
+# Check regular use of constants
+SCOPE: {
+### IS THIS CORRECT?
+my $v = version_is( <<'END_PERL', '5.004', 'constant hash adds a 5.008 dep' );
+use constant FOO => 1;
+};
 1;
 END_PERL
 }

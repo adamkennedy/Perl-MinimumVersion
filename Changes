@@ -1,5 +1,12 @@
 Revision history for Perl extension Perl::MinimumVersion
 
+0.14 Tue  6 Mar 2007
+	- Adding support for checking the 5.8 dep "use constant { ... };"
+	- Moderning the tests a little
+	- Push the version.pm dependency again to 0.70 to avoid
+	  a number of edge case and legacy API issues that bit us earlier.
+	- Upgraded to Module::Install 0.65_01
+
 0.13 Sat 22 Apr 2006
 	- No functional changes
 	- Moved over from SourceForge CVS to new collaborative SVN repository

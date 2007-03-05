@@ -8,10 +8,10 @@ Perl::MinimumVersion - Find a minimum required version of perl for Perl code
 
 =head1 SYNOPSIS
 
-  # Create the checker object
+  # Create the version checking object
   $object = Perl::MinimumVersion->new( $filename );
   $object = Perl::MinimumVersion->new( \$source  );
-  $object = Perl::MinimumVersion->new( $Document );
+  $object = Perl::MinimumVersion->new( $ppi_document );
   
   # Find the minimum version
   $version = $object->minimum_version;
@@ -22,15 +22,10 @@ C<Perl::MinimumVersion> takes Perl source code and calculates the minimum
 version of perl required to be able to run it. Because it is based on
 L<PPI>, it can do this without having to actually load the code.
 
-This first release only tests based on the syntax of your code.
+Currently it tests both the syntax of your code, and the use of explicit
+version dependencies such as C<require 5.005>.
 
-As this module develops, it will also be able to check explicitly
-specified versions via C<require 5.005;>, and trace module dependencies
-as needed.
-
-Amoungst other things, we hope to be able to build a test that is able to
-tell when the version needed based on the code syntax is higher than the
-version you explicitly specified (and thus, is a package bug).
+Future plans are to also add support for tracing module dependencies.
 
 Using C<Perl::MinimumVersion> is dead simple, the synopsis pretty much
 covers it.
@@ -51,7 +46,7 @@ use base 'Exporter';
 
 use vars qw{$VERSION @EXPORT_OK %CHECKS %MATCHES};
 BEGIN {
-	$VERSION = '0.13';
+	$VERSION = '0.14';
 
 	# Export the PMV convenience constant
 	@EXPORT_OK = 'PMV';
@@ -61,6 +56,7 @@ BEGIN {
 		# Various small things
 		_bugfix_magic_errno   => version->new('5.008.003'),
 		_unquoted_versions    => version->new('5.008.001'),
+		_constant_hash        => version->new('5.008'),
 
 		# Included in 5.6. Broken until 5.8
 		_pragma_utf8          => version->new('5.008'),
@@ -105,7 +101,12 @@ sub PMV () { 'Perl::MinimumVersion' }
 
 =pod
 
-=head2 new $filename | \$source | $PPI_Document
+=head2 new
+
+  # Create the version checking object
+  $object = Perl::MinimumVersion->new( $filename );
+  $object = Perl::MinimumVersion->new( \$source  );
+  $object = Perl::MinimumVersion->new( $ppi_document );
 
 The C<new> constructor creates a new version checking object for a
 L<PPI::Document>. You can also provide the document to be read as a
@@ -378,6 +379,21 @@ sub _pragma_utf8 {
 		and
 		$_[1]->module eq 'utf8'
 		# This used to be pragma(), but that was buggy in PPI v1.118
+	} );
+}
+
+# Check for the use of 'use constant { ... }'
+sub _constant_hash {
+	shift->Document->find_any( sub {
+		$_[1]->isa('PPI::Statement::Include')
+		and
+		$_[1]->type
+		and
+		$_[1]->type eq 'use'
+		and
+		$_[1]->module eq 'constant'
+		and
+		$_[1]->schild(2)->isa('PPI::Structure')
 	} );
 }
 
