@@ -39,7 +39,7 @@ use strict;
 use version      ();
 use Carp         ();
 use List::Util   ();
-use Params::Util '_INSTANCE';
+use Params::Util '_INSTANCE', '_CLASS';
 use PPI::Util    '_Document';
 use PPI          ();
 use base 'Exporter';
