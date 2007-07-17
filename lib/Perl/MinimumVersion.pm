@@ -57,6 +57,7 @@ BEGIN {
 		_bugfix_magic_errno   => version->new('5.008.003'),
 		_unquoted_versions    => version->new('5.008.001'),
 		_constant_hash        => version->new('5.008'),
+		_use_base_exporter    => version->new('5.008'),
 
 		# Included in 5.6. Broken until 5.8
 		_pragma_utf8          => version->new('5.008'),
@@ -377,8 +378,12 @@ sub _pragma_utf8 {
 	shift->Document->find_any( sub {
 		$_[1]->isa('PPI::Statement::Include')
 		and
-		$_[1]->module eq 'utf8'
-		# This used to be pragma(), but that was buggy in PPI v1.118
+		(
+			($_[1]->module and $_[1]->module eq 'utf8')
+			or
+			($_[1]->pragma and $_[1]->pragma eq 'utf8')
+		)
+		# This used to be just pragma(), but that was buggy in PPI v1.118
 	} );
 }
 
@@ -484,6 +489,18 @@ sub _any_INIT_blocks {
 	} );
 }
 
+# use base 'Exporter' doesn't work reliably everywhere until 5.008
+sub _use_base_exporter {
+	shift->Document->find_any( sub {
+		$_[1]->isa('PPI::Statement::Include')
+		and
+		$_[1]->module eq 'base'
+		and
+		# Add the "not colon" characters to avoid accidentally
+		# colliding with any other Exporter-named modules
+		$_[1]->content =~ /[^:]\bExporter\b[^:]/
+	} );
+}
 
 
 

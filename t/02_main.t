@@ -199,4 +199,12 @@ is(
 );
 }
 
+# Check the use of constant hashes
+SCOPE: {
+my $v = version_is( <<'END_PERL', '5.008', 'use base "Exporter" is a 5.008 dep' );
+use base 'Exporter';
+1;
+END_PERL
+}
+
 1;
