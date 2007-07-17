@@ -279,16 +279,21 @@ or C<undef> on error.
 =cut
 
 sub minimum_syntax_version {
-	my $self = _self(@_) or return undef;
-	unless ( defined $self->{syntax} ) {
-		$self->{syntax} = $self->_minimum_syntax_version;
+	my $self = _self(shift) or return undef;
+	my $limit = shift;
+	if ( defined $limit and ! _INSTANCE($limit, 'version') ) {
+		$limit = version->new("$limit");
 	}
-	$self->{syntax};
+	unless ( defined $self->{syntax} ) {
+		$self->{default} = $limit;
+		$self->{syntax}  = $self->_minimum_syntax_version( $limit );
+	}
+	return _max( $self->{syntax}, $self->{default} );
 }
 
 sub _minimum_syntax_version {
 	my $self   = shift;
-	my $filter = $self->{default};
+	my $filter = shift || $self->{default};
 
 	# Always check in descending version order.
 	# By doing it this way, the version of the first check that matches
@@ -515,9 +520,9 @@ sub _self {
 		return shift;
 	}
 	if ( _CLASS($_[0]) and $_[0]->isa('Perl::MinimumVersion') ) {
-		return shift->new(@_);
+		return shift->new($_[0]);
 	}
-	Perl::MinimumVersion->new(@_);
+	Perl::MinimumVersion->new($_[0]);
 }
 
 # Find the maximum version, ignoring problems
