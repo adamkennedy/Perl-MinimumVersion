@@ -8,7 +8,7 @@ BEGIN {
 	$^W = 1;
 }
 
-use Test::More tests => 55;
+use Test::More tests => 58;
 use version;
 use File::Spec::Functions ':ALL';
 use PPI;

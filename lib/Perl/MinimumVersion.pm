@@ -266,12 +266,12 @@ version. This should provide dramatic speed improvements for
 large and/or complex documents.
 
 The limitations of parsing Perl mean that this method may provide
-artifically low results, but not artificially high results.
+artifically low results, but should not artificially high results.
 
 For example, if C<minimum_syntax_version> returned 5.006, you can be
 confident it will not run on anything lower, although there is a chance
-it during actual execution it may use some untestable  feature that creates
-a dependency on a higher version.
+that during actual execution it may use some untestable  feature that
+creates a dependency on a higher version.
 
 Returns a L<version> object, false if no dependencies could be found,
 or C<undef> on error.
@@ -279,16 +279,30 @@ or C<undef> on error.
 =cut
 
 sub minimum_syntax_version {
-	my $self = _self(shift) or return undef;
-	my $limit = shift;
+	my $self  = _self(@_) or return undef;
+	my $limit = ref($_[0]) ? $_[1] : $_[2];
 	if ( defined $limit and ! _INSTANCE($limit, 'version') ) {
 		$limit = version->new("$limit");
 	}
-	unless ( defined $self->{syntax} ) {
-		$self->{default} = $limit;
-		$self->{syntax}  = $self->_minimum_syntax_version( $limit );
+	if ( defined $self->{syntax} ) {
+		if ( $self->{syntax} >= $limit ) {
+			# Previously discovered minimum is what they want
+			return $self->{syntax};
+		}
+
+		# Rather than return a value BELOW their filter,
+		# which they would not be expecting, return false.
+		return '';
 	}
-	return _max( $self->{syntax}, $self->{default} );
+
+	# Look for the value
+	my $syntax = $self->_minimum_syntax_version( $limit );
+
+	# If we found a value, it will be stable, cache it.
+	# If we did NOT, don't cache as subsequent runs without
+	# the filter may find a version.
+	$self->{syntax} = $syntax if $syntax;
+	return $syntax;
 }
 
 sub _minimum_syntax_version {

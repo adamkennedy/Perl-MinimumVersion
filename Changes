@@ -4,6 +4,7 @@ Revision history for Perl extension Perl::MinimumVersion
 	- No functional changes
 	- Updating List::Util dependency to 1.19 to resolve Win32 memory leak
 	- Adding rule for "use base 'Exporter';" (some old versions don't export import)
+	- Correcting the behaviour of minimum_syntax_version when provided a filter
 
 0.14 Tue  6 Mar 2007
 	- Adding support for checking the 5.8 dep "use constant { ... };"
