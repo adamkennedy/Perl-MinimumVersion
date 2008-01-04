@@ -1,5 +1,7 @@
 Revision history for Perl extension Perl::MinimumVersion
 
+        - Detection of mro.pm and feature.pm (Alexandr Ciornii)
+
 0.15 Tue 17 Jul 2007
 	- No functional changes
 	- Updating List::Util dependency to 1.19 to resolve Win32 memory leak

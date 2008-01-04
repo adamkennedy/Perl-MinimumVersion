@@ -12,7 +12,7 @@ Perl::MinimumVersion - Find a minimum required version of perl for Perl code
   $object = Perl::MinimumVersion->new( $filename );
   $object = Perl::MinimumVersion->new( \$source  );
   $object = Perl::MinimumVersion->new( $ppi_document );
-  
+
   # Find the minimum version
   $version = $object->minimum_version;
 
@@ -53,6 +53,8 @@ BEGIN {
 
 	# The primary list of version checks
 	%CHECKS = (
+		_perl_5010_pragmas    => version->new('5.010'),
+
 		# Various small things
 		_bugfix_magic_errno   => version->new('5.008.003'),
 		_unquoted_versions    => version->new('5.008.001'),
@@ -77,6 +79,10 @@ BEGIN {
 
 	# Predefine some indexes needed by various check methods
 	%MATCHES = (
+		_perl_5010_pragmas => {
+			mro        => 1,
+			feature    => 1,
+		},
 		_perl_5006_pragmas => {
 			warnings   => 1,
 			attributes => 1,
@@ -354,6 +360,14 @@ sub _minimum_external_version {
 
 #####################################################################
 # Version Check Methods
+
+sub _perl_5010_pragmas {
+	shift->Document->find_any( sub {
+		$_[1]->isa('PPI::Statement::Include')
+		and
+		$MATCHES{_perl_5010_pragmas}->{$_[1]->pragma}
+	} );
+}
 
 sub _bugfix_magic_errno {
 	my $Document = shift->Document;

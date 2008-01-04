@@ -8,7 +8,7 @@ BEGIN {
 	$^W = 1;
 }
 
-use Test::More tests => 58;
+use Test::More tests => 62;
 use version;
 use File::Spec::Functions ':ALL';
 use PPI;
@@ -176,6 +176,14 @@ use constant FOO => 1;
 };
 1;
 END_PERL
+}
+
+# Check 'mro' pragma
+SCOPE: {
+my $v = version_is( <<'END_PERL', '5.010', '"use mro" matches expected version' );
+use mro 'c3';
+END_PERL
+is( $v->_perl_5010_pragmas, 1, '->_any_our_variables returns true' );
 }
 
 # Check that minimum_syntax_version's limit param is respected
