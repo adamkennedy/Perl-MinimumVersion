@@ -53,12 +53,13 @@ sub message        ($);
 sub error          (@);
 sub format_version ($);
 
-use vars qw{$VERSION $VERBOSE};
+use vars qw{$VERSION $VERBOSE $BLAME};
 BEGIN {
 	$VERSION = '0.15';
 
 	# Configuration globals
 	$VERBOSE = '';
+	$BLAME   = '';
 
 	# Unbuffer output
 	$| = 1;
@@ -81,123 +82,172 @@ my $FIND_PERL = FFR->file
 
 GetOptions(
 	verbose => \$VERBOSE,
-	);
+	blame   => \$BLAME,
+);
 
 # Get the target
-my $target = shift @ARGV
-	or error("You did not provide a file or directory to check");
-my @files = ();
-print "\n";
-if ( -d $target ) {
-	verbose "Found directory '$target'\n";
-	verbose "Searching for Perl files... ";
-	@files = $FIND_PERL->in( $target );
-	verbose "found " . scalar(@files) . " file(s)\n";
-} elsif ( -f $target ) {
-	verbose "Found file '$target'\n";
-	@files = $target;
-} else {
-	error "File or directory '$target' does not exist";
+my $target = shift @ARGV;
+unless ( $target ) {
+	error("You did not provide a file or directory to check");
 }
+
+print "\n";
+if ( $BLAME ) {
+	blame($target);
+} else {
+	summary($target);
+}
+
+exit(0);
 
 
 
 
 
 #####################################################################
-# Execution
+# Regular Mode
 
-# Scan the files
-verbose "Processing files...\n";
-my @results  = ();
-my $file_len = 12 + List::Util::max map { length $_ } @files;
-foreach my $file ( @files ) {
-	# Set up the results data
-	verbose sprintf("%-${file_len}s", "Scanning $file...");
-	my $result  = [ $file, undef, undef ];
-	push @results, $result;
-
-	# Create the version checker
-	my $pmv = PMV->new( $file );
-	unless ( $pmv ) {
-		verbose "[error]\n";
-		next;
+sub summary {
+	my $target = shift;
+	my @files  = ();
+	if ( -d $target ) {
+		verbose "Found directory '$target'\n";
+		verbose "Searching for Perl files... ";
+		@files = $FIND_PERL->in( $target );
+		verbose "found " . scalar(@files) . " file(s)\n";
+	} elsif ( -f $target ) {
+		verbose "Found file '$target'\n";
+		@files = $target;
+	} else {
+		error "File or directory '$target' does not exist";
 	}
 
-	# Check the explicit version
-	$result->[1] = $pmv->minimum_explicit_version;
+	# Scan the files
+	verbose "Processing files...\n";
+	my @results  = ();
+	my $file_len = 12 + List::Util::max map { length $_ } @files;
+	foreach my $file ( @files ) {
+		# Set up the results data
+		verbose sprintf("%-${file_len}s", "Scanning $file...");
+		my $result  = [ $file, undef, undef ];
+		push @results, $result;
 
-	# Check the syntax version
-	$result->[2] = $pmv->minimum_syntax_version;
+		# Create the version checker
+		my $pmv = PMV->new( $file );
+		unless ( $pmv ) {
+			verbose "[error]\n";
+			next;
+		}
 
-	verbose "[ok]\n";
-}
+		# Check the explicit version
+		$result->[1] = $pmv->minimum_explicit_version;
 
-# Calculate the minimum explicit, syntax and total versions
-verbose "Compiling results...\n";
-my $pmv_explicit = PMV->_max( map { $_->[1] } @results   );
-my $pmv_syntax   = PMV->_max( map { $_->[2] } @results   );
-my $pmv_bug      = !! ($pmv_explicit and $pmv_syntax and $pmv_syntax > $pmv_explicit);
-my $pmv_total    = PMV->_max( $pmv_explicit, $pmv_syntax );
+		# Check the syntax version
+		$result->[2] = $pmv->minimum_syntax_version;
 
-# Generate the output values
-my @outputs = ( [ 'file', 'explicit', 'syntax', 'external' ] );
-foreach my $result ( @results ) {
-	my $output = [];
-	$output->[0] = $result->[0];
-	$output->[1] = format_version($result->[1]);
-	$output->[2] = format_version($result->[2]);
-	# $output->[3] = format_version($result->[3]);
-	$output->[3] = 'n/a';
-	push @outputs, $output;
-}
+		verbose "[ok]\n";
+	}
 
-# Complete the output preperation work
-$pmv_explicit     = format_version( $pmv_explicit );
-$pmv_syntax       = format_version( $pmv_syntax   );
-$pmv_total        = format_version( $pmv_total    );
-if ( $pmv_total eq '~' ) {
-	$pmv_total = format_version( qv(5.004) ) . ' (default)';
-}
-my $len0          = List::Util::max map { length $_->[0] } @outputs;
-my $len1          = List::Util::max map { length $_->[1] } @outputs;
-my $len2          = List::Util::max map { length $_->[2] } @outputs;
-my $len3          = List::Util::max map { length $_->[3] } @outputs;
-my $len_all       = $len0 + $len1 + $len2 + $len3 + 9;
-my $len_totals    = $len1 + $len2 + $len3 + 6;
-my $line_format   = " | %-${len0}s | %-${len1}s | %-${len2}s | %-${len3}s |\n";
-my $spacer        = '-' x $len_all;
-my $error_message = "ERROR DETECTED : ACTUAL DEPENDENCY HIGHER THAN SPECIFIED";
-my $error_length  = length $error_message;
-if ( $error_length > $len_all ) {
-	my $diff = $error_length - $len_all;
-	$len_all += $diff;
-	$len0    += $diff;
-}
+	# Calculate the minimum explicit, syntax and total versions
+	verbose "Compiling results...\n";
+	my $pmv_explicit = PMV->_max( map { $_->[1] } @results   );
+	my $pmv_syntax   = PMV->_max( map { $_->[2] } @results   );
+	my $pmv_bug      = !! ($pmv_explicit and $pmv_syntax and $pmv_syntax > $pmv_explicit);
+	my $pmv_total    = PMV->_max( $pmv_explicit, $pmv_syntax );
 
-# Print the results
-print "\n";
-print "   $spacer\n";
-printf( $line_format, @{shift(@outputs)} );
-print " | $spacer |\n";
-foreach my $result ( @outputs ) {
-	printf( $line_format, @$result );
-}
-print " | $spacer |\n";
-printf( " | %-${len_all}s |\n", "Minimum explicit version : $pmv_explicit" );
-printf( " | %-${len_all}s |\n", "Minimum syntax version   : $pmv_syntax"   );
-printf( " | %-${len_all}s |\n", "Minimum version of perl  : $pmv_total"    );
-if ( $pmv_bug ) {
+	# Generate the output values
+	my @outputs = ( [ 'file', 'explicit', 'syntax', 'external' ] );
+	foreach my $result ( @results ) {
+		my $output = [];
+		$output->[0] = $result->[0];
+		$output->[1] = format_version($result->[1]);
+		$output->[2] = format_version($result->[2]);
+		# $output->[3] = format_version($result->[3]);
+		$output->[3] = 'n/a';
+		push @outputs, $output;
+	}
+
+	# Complete the output preperation work
+	$pmv_explicit     = format_version( $pmv_explicit );
+	$pmv_syntax       = format_version( $pmv_syntax   );
+	$pmv_total        = format_version( $pmv_total    );
+	if ( $pmv_total eq '~' ) {
+		$pmv_total = format_version( qv(5.004) ) . ' (default)';
+	}
+	my $len0          = List::Util::max map { length $_->[0] } @outputs;
+	my $len1          = List::Util::max map { length $_->[1] } @outputs;
+	my $len2          = List::Util::max map { length $_->[2] } @outputs;
+	my $len3          = List::Util::max map { length $_->[3] } @outputs;
+	my $len_all       = $len0 + $len1 + $len2 + $len3 + 9;
+	my $len_totals    = $len1 + $len2 + $len3 + 6;
+	my $line_format   = " | %-${len0}s | %-${len1}s | %-${len2}s | %-${len3}s |\n";
+	my $spacer        = '-' x $len_all;
+	my $error_message = "ERROR DETECTED : ACTUAL DEPENDENCY HIGHER THAN SPECIFIED";
+	my $error_length  = length $error_message;
+	if ( $error_length > $len_all ) {
+		my $diff = $error_length - $len_all;
+		$len_all += $diff;
+		$len0    += $diff;
+	}
+
+	# Print the results
+	print "\n";
+	print "   $spacer\n";
+	printf( $line_format, @{shift(@outputs)} );
 	print " | $spacer |\n";
-	printf( " | %-${len_all}s |\n", "ERROR DETECTED : ACTUAL DEPENDENCY HIGHER THAN SPECIFIED" );
+	foreach my $result ( @outputs ) {
+		printf( $line_format, @$result );
+	}
+	print " | $spacer |\n";
+	printf( " | %-${len_all}s |\n", "Minimum explicit version : $pmv_explicit" );
+	printf( " | %-${len_all}s |\n", "Minimum syntax version   : $pmv_syntax"   );
+	printf( " | %-${len_all}s |\n", "Minimum version of perl  : $pmv_total"    );
+	if ( $pmv_bug ) {
+		print " | $spacer |\n";
+		printf( " | %-${len_all}s |\n", "ERROR DETECTED : ACTUAL DEPENDENCY HIGHER THAN SPECIFIED" );
+	}
+	print "   $spacer\n";
+	print "\n";
 }
-print "   $spacer\n";
-print "\n";
 
+sub blame {
+	my $target = shift;
+	my @files  = ();
+	if ( -d $target ) {
+		verbose "Found directory '$target'\n";
+		verbose "Searching for Perl files... ";
+		@files = $FIND_PERL->in( $target );
+		verbose "found " . scalar(@files) . " file(s)\n";
+	} elsif ( -f $target ) {
+		verbose "Found file '$target'\n";
+		@files = $target;
+	} else {
+		error "File or directory '$target' does not exist";
+	}
 
+	# Scan the files
+	verbose "Processing files...\n";
+	my $maximum  = undef;
+	my $blame    = undef;
+	my $file_len = 12 + List::Util::max map { length $_ } @files;
+	foreach my $file ( @files ) {
+		# Set up the results data
+		verbose sprintf("%-${file_len}s", "Scanning $file...");
 
-# Done
-exit(0);
+		# Create the version checker
+		my $pmv = PMV->new( $file );
+		unless ( $pmv ) {
+			verbose "[error]\n";
+			next;
+		}
+
+		# Check the syntax version
+		my @syntax = $pmv->minimum_syntax_version;
+
+		verbose "[ok]\n";
+	}
+
+}
 
 
 
@@ -261,7 +311,7 @@ L<PPI>, L<Perl::MinimumVersion>
 
 =head1 COPYRIGHT
 
-Copyright (c) 2005, 2006 Adam Kennedy. All rights reserved.
+Copyright (c) 2005, 2006 Adam Kennedy.
 
 This program is free software; you can redistribute
 it and/or modify it under the same terms as Perl itself.

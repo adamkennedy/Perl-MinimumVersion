@@ -42,18 +42,21 @@ use List::Util   ();
 use Params::Util '_INSTANCE', '_CLASS';
 use PPI::Util    '_Document';
 use PPI          ();
-use base 'Exporter';
+use Exporter     ();
 
-use vars qw{$VERSION @EXPORT_OK %CHECKS %MATCHES};
+use vars qw{$VERSION @ISA @EXPORT_OK %CHECKS %MATCHES};
 BEGIN {
 	$VERSION = '0.15';
 
 	# Export the PMV convenience constant
+	@ISA       = 'Exporter';
 	@EXPORT_OK = 'PMV';
 
 	# The primary list of version checks
 	%CHECKS = (
-		_perl_5010_pragmas    => version->new('5.010'),
+		_perl_5100_pragmas    => version->new('5.010'),
+		_perl_5100_operators  => version->new('5.010'),
+		_perl_5100_magic      => version->new('5.010'),
 
 		# Various small things
 		_bugfix_magic_errno   => version->new('5.008.003'),
@@ -69,6 +72,7 @@ BEGIN {
 		_any_binary_literals  => version->new('5.006'),
 		_magic_version        => version->new('5.006'),
 		_any_attributes       => version->new('5.006'),
+		# _three_argument_open  => version->new('5.006'),
 
 		_perl_5005_pragmas    => version->new('5.005'),
 		_perl_5005_modules    => version->new('5.005'),
@@ -79,9 +83,18 @@ BEGIN {
 
 	# Predefine some indexes needed by various check methods
 	%MATCHES = (
-		_perl_5010_pragmas => {
+		_perl_5100_pragmas => {
 			mro        => 1,
 			feature    => 1,
+		},
+		_perl_5100_operators => {
+			'//'       => 1,
+			'//='      => 1,
+			'~~'       => 1,
+		},
+		_perl_5100_magic => {
+			'%+'       => 1,
+			'%-'       => 1,
 		},
 		_perl_5006_pragmas => {
 			warnings   => 1,
@@ -361,11 +374,27 @@ sub _minimum_external_version {
 #####################################################################
 # Version Check Methods
 
-sub _perl_5010_pragmas {
+sub _perl_5100_pragmas {
 	shift->Document->find_any( sub {
 		$_[1]->isa('PPI::Statement::Include')
 		and
-		$MATCHES{_perl_5010_pragmas}->{$_[1]->pragma}
+		$MATCHES{_perl_5100_pragmas}->{$_[1]->pragma}
+	} );
+}
+
+sub _perl_5100_operators {
+	shift->Document->find_any( sub {
+		$_[1]->isa('PPI::Token::Magic')
+		and
+		$MATCHES{_perl_5100_operators}->{$_[1]->content}
+	} );
+}
+
+sub _perl_5100_magic {
+	shift->Document->find_any( sub {
+		$_[1]->isa('PPI::Token::Operator')
+		and
+		$MATCHES{_perl_5100_magic}->{$_[1]->content}
 	} );
 }
 
@@ -535,6 +564,10 @@ sub _use_base_exporter {
 	} );
 }
 
+# sub _three_argument_open {
+#     ...to be written...
+# }
+
 
 
 
@@ -567,8 +600,8 @@ sub _max {
 
 =head1 BUGS
 
-It's very early days, so this probably doesn't catch anywhere near enough
-syntax cases, and I personally don't know enough of them.
+B<Perl::MinimumVersion> does a reasonable job of catching the best-known
+explicit
 
 B<However> it is exceedingly easy to add a new syntax check, so if you
 find something this is missing, copy and paste one of the existing
@@ -579,11 +612,15 @@ I don't even need an entire diff... just the function and version.
 
 =head1 TO DO
 
-- Write lots more version checkers
+B<Write lots more version checkers>
 
-- Write the explicit version checker
+- Perl 5.10 operators and language structures
 
-- Write the recursive module descend stuff
+- Three-argument open
+
+B<Write the explicit version checker>
+
+B<Write the recursive module descend stuff>
 
 =head1 SUPPORT
 
