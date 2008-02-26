@@ -54,9 +54,9 @@ BEGIN {
 
 	# The primary list of version checks
 	%CHECKS = (
-		_perl_5100_pragmas    => version->new('5.010'),
-		_perl_5100_operators  => version->new('5.010'),
-		_perl_5100_magic      => version->new('5.010'),
+		_perl_5010_pragmas    => version->new('5.010'),
+		_perl_5010_operators  => version->new('5.010'),
+		_perl_5010_magic      => version->new('5.010'),
 
 		# Various small things
 		_bugfix_magic_errno   => version->new('5.008.003'),
@@ -83,16 +83,16 @@ BEGIN {
 
 	# Predefine some indexes needed by various check methods
 	%MATCHES = (
-		_perl_5100_pragmas => {
+		_perl_5010_pragmas => {
 			mro        => 1,
 			feature    => 1,
 		},
-		_perl_5100_operators => {
+		_perl_5010_operators => {
 			'//'       => 1,
 			'//='      => 1,
 			'~~'       => 1,
 		},
-		_perl_5100_magic => {
+		_perl_5010_magic => {
 			'%+'       => 1,
 			'%-'       => 1,
 		},
@@ -368,33 +368,71 @@ sub _minimum_external_version {
 }
 
 
+=head2 version_markers
+
+This method returns a list of pairs in the form:
+
+  ($version, \@markers)
+
+Each pair represents all the markers that could be found indicating that the
+version was the minimum needed version.  C<@markers> is an array of strings.
+Currently, these strings are not as clear as they might be, but this may be
+changed in the future.  In other words: don't rely on them as specific
+identifiers.
+
+=cut
+
+sub version_markers {
+	my $self = _self(@_) or return undef;
+
+	my %markers;
+
+	if (my $explicit = $self->minimum_explicit_version) {
+		$markers{ $explicit } = [ 'explicit' ];
+	}
+
+	for my $check (keys %CHECKS) {
+		next unless $self->$check();
+		my $markers = $markers{ $CHECKS{$check} } ||= [];
+		push @$markers, $check;
+	}
+
+	my @return;
+	my %marker_ver = map { $_ => version->new($_) } keys %markers;
+
+	for my $ver (sort { $marker_ver{$b} <=> $marker_ver{$a} } keys %markers) {
+		push @return, $marker_ver{$ver} => $markers{$ver};
+	}
+
+	return @return;
+}
 
 
 
 #####################################################################
 # Version Check Methods
 
-sub _perl_5100_pragmas {
+sub _perl_5010_pragmas {
 	shift->Document->find_any( sub {
 		$_[1]->isa('PPI::Statement::Include')
 		and
-		$MATCHES{_perl_5100_pragmas}->{$_[1]->pragma}
+		$MATCHES{_perl_5010_pragmas}->{$_[1]->pragma}
 	} );
 }
 
-sub _perl_5100_operators {
+sub _perl_5010_operators {
 	shift->Document->find_any( sub {
 		$_[1]->isa('PPI::Token::Magic')
 		and
-		$MATCHES{_perl_5100_operators}->{$_[1]->content}
+		$MATCHES{_perl_5010_operators}->{$_[1]->content}
 	} );
 }
 
-sub _perl_5100_magic {
+sub _perl_5010_magic {
 	shift->Document->find_any( sub {
 		$_[1]->isa('PPI::Token::Operator')
 		and
-		$MATCHES{_perl_5100_magic}->{$_[1]->content}
+		$MATCHES{_perl_5010_magic}->{$_[1]->content}
 	} );
 }
 

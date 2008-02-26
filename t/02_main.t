@@ -8,7 +8,7 @@ BEGIN {
 	$^W = 1;
 }
 
-use Test::More tests => 62;
+use Test::More tests => 66;
 use version;
 use File::Spec::Functions ':ALL';
 use PPI;
@@ -214,5 +214,33 @@ use base 'Exporter';
 1;
 END_PERL
 }
+
+# test version_markers
+SCOPE: {
+my $perl = <<'END_PERL';
+use 5.005;
+use mro 'dfs';
+our $VERSION;
+sub example : Sufficies { }
+END_PERL
+my @result = PMV->version_markers(\$perl);
+is(@result, 6, "we find three versioned marked in the result");
+
+my @expect = (
+	'5.010' => [ qw(_perl_5010_pragmas) ],
+	'5.006' => [ qw(_any_our_variables _any_attributes) ],
+	'5.005' => [ qw(explicit) ],
+);
+
+for my $i (map { $_ * 2 } 0 .. $#result / 2) {
+	is_deeply(
+		[ "$result[$i]", [ sort @{ $result[$i + 1] } ] ],
+		[ $expect[$i],   [ sort @{ $expect[$i + 1] } ] ],
+		"correct data in results pos $i",
+	);
+}
+
+}
+
 
 1;
