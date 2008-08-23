@@ -46,7 +46,7 @@ use Exporter     ();
 
 use vars qw{$VERSION @ISA @EXPORT_OK %CHECKS %MATCHES};
 BEGIN {
-	$VERSION = '0.16';
+	$VERSION = '1.18';
 
 	# Export the PMV convenience constant
 	@ISA       = 'Exporter';
