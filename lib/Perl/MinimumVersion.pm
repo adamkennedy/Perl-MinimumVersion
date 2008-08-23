@@ -46,7 +46,7 @@ use Exporter     ();
 
 use vars qw{$VERSION @ISA @EXPORT_OK %CHECKS %MATCHES};
 BEGIN {
-	$VERSION = '0.15';
+	$VERSION = '0.16';
 
 	# Export the PMV convenience constant
 	@ISA       = 'Exporter';
@@ -63,6 +63,7 @@ BEGIN {
 		_unquoted_versions    => version->new('5.008.001'),
 		_constant_hash        => version->new('5.008'),
 		_use_base_exporter    => version->new('5.008'),
+		_local_soft_reference => version->new('5.008'),
 
 		# Included in 5.6. Broken until 5.8
 		_pragma_utf8          => version->new('5.008'),
@@ -74,6 +75,7 @@ BEGIN {
 		_any_attributes       => version->new('5.006'),
 		# _three_argument_open  => version->new('5.006'),
 
+		_any_qr_tokens        => version->new('5.005_03'),
 		_perl_5005_pragmas    => version->new('5.005'),
 		_perl_5005_modules    => version->new('5.005'),
 		_any_tied_arrays      => version->new('5.005'),
@@ -540,6 +542,10 @@ sub _any_attributes {
 	shift->Document->find_any( 'Token::Attribute' );
 }
 
+sub _any_qr_tokens {
+	shift->Document->find_any( 'Token::QuoteLike::Regexp' );
+}
+
 sub _perl_5005_pragmas {
 	shift->Document->find_any( sub {
 		$_[1]->isa('PPI::Statement::Include')
@@ -599,6 +605,32 @@ sub _use_base_exporter {
 		# Add the "not colon" characters to avoid accidentally
 		# colliding with any other Exporter-named modules
 		$_[1]->content =~ /[^:]\bExporter\b[^:]/
+	} );
+}
+
+# You can't localize a soft reference
+sub _local_soft_reference {
+	shift->Document->find_any( sub {
+		$_[1]->isa('PPI::Statement::Variable')  or return '';
+		$_[1]->type eq 'local'                  or return '';
+
+		# The second child should be a '$' cast.
+		my @child = $_[1]->schildren;
+		scalar(@child) >= 2                     or return '';
+		$child[1]->isa('PPI::Token::Cast')      or return '';
+		$child[1]->content eq '$'               or return '';
+
+		# The third child should be a block
+		$child[2]->isa('PPI::Structure::Block') or return '';
+
+		# Inside the block should be a string in a statement
+		my $statement = $child[2]->schild(0)    or return '';
+		$statement->isa('PPI::Statement')       or return '';
+		my $inside = $statement->schild(0)      or return '';
+		$inside->isa('PPI::Token::Quote')       or return '';
+
+		# This is indeed a localized soft reference
+		return 1;
 	} );
 }
 

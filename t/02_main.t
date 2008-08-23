@@ -8,7 +8,7 @@ BEGIN {
 	$^W = 1;
 }
 
-use Test::More tests => 66;
+use Test::More tests => 70;
 use version;
 use File::Spec::Functions ':ALL';
 use PPI;
@@ -186,6 +186,14 @@ END_PERL
 is( $v->_perl_5010_pragmas, 1, '->_any_our_variables returns true' );
 }
 
+# Check the localized soft refernence pragma
+SCOPE: {
+my $v = version_is( <<'END_PERL', '5.008', 'Localized soft reference matched expected version' );
+local ${ "${class}::DIE" } = 1;
+END_PERL
+is( $v->_local_soft_reference, 1, '->_local_soft_reference returns true' );
+}
+
 # Check that minimum_syntax_version's limit param is respected
 SCOPE: {
 my $doc = PPI::Document->new(\'our $x'); # requires 5.006 syntax
@@ -241,6 +249,5 @@ for my $i (map { $_ * 2 } 0 .. $#result / 2) {
 }
 
 }
-
 
 1;
