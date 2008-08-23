@@ -101,7 +101,7 @@ SCOPE: {
 	# version_is tests the final method
 
 	# Bad things
-	foreach ( [], {}, sub { 1 } ) { # Add undef as well after PPI 0.906
+	foreach ( {}, sub { 1 }, undef ) {
 		is( Perl::MinimumVersion->new( $_ ), undef, '->new(evil) returns undef' );
 	}
 }
