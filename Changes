@@ -1,5 +1,10 @@
 Revision history for Perl extension Perl::MinimumVersion
 
+1.18 Sat 23 Aug 2008
+	- Moving bin/perlver to more correct script/perlver
+	- Adding test for localising soft references (BDFOY)
+	- Updating to Module::Install 0.77
+
 0.16 Sat 10 May 2008
 	- Adding rules for mro.pm and feature.pm (Alexandr Ciornii)
 	- Adding rules for 5.10.0 operators and magic variables (Adam Kennedy)
