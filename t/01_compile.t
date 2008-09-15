@@ -15,5 +15,5 @@ ok( $] >= 5.005, 'Your perl is new enough' );
 
 use_ok('Perl::MinimumVersion' );
 
-script_compiles_ok( 'script/perlver', 'perver compiles ok' );
+script_compiles_ok( 'script/perlver', 'perlver compiles ok' );
 

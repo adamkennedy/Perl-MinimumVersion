@@ -1,5 +1,7 @@
 #!/usr/bin/perl
 
+package perlver;
+
 =pod
 
 =head1 NAME
@@ -36,26 +38,26 @@ The synopsis above pretty much covers all you need to know at this point.
 
 =cut
 
-package perlver;
-
 use 5.005;
 use strict;
-use version              'qv';
-use Getopt::Long         'GetOptions';
-use Params::Util         '_INSTANCE';
-use File::Find::Rule     ();
-use constant             'FFR' => 'File::Find::Rule';
-use Perl::MinimumVersion 'PMV';
+use version                'qv';
+use File::Spec             ();
+use Getopt::Long           'GetOptions';
+use Params::Util           '_INSTANCE';
+use File::Find::Rule       ();
+use File::Find::Rule::Perl ();
+use Perl::MinimumVersion   'PMV';
 
 # Define prototypes
 sub verbose        ($);
 sub message        ($);
 sub error          (@);
 sub format_version ($);
+sub dist           ($);
 
 use vars qw{$VERSION $VERBOSE $BLAME};
 BEGIN {
-	$VERSION = '1.18';
+	$VERSION = '1.19';
 
 	# Configuration globals
 	$VERBOSE = '';
@@ -64,14 +66,6 @@ BEGIN {
 	# Unbuffer output
 	$| = 1;
 }
-
-# Perl file searcher
-my $FIND_PERL = FFR->file
-	->or(
-		FFR->name( qr/\.(?:pm|pl|t)$/i ),
-		FFR->name( qr/^[^\.]$/ )
-		   ->grep( qr/^#!.*\bperl/, [ sub { 1 } ] )
-	);
 
 
 
@@ -113,7 +107,7 @@ sub summary {
 	if ( -d $target ) {
 		verbose "Found directory '$target'\n";
 		verbose "Searching for Perl files... ";
-		@files = $FIND_PERL->in( $target );
+		@files = find($target);
 		verbose "found " . scalar(@files) . " file(s)\n";
 	} elsif ( -f $target ) {
 		verbose "Found file '$target'\n";
@@ -216,7 +210,7 @@ sub blame {
 	if ( -d $target ) {
 		verbose "Found directory '$target'\n";
 		verbose "Searching for Perl files... ";
-		@files = $FIND_PERL->in( $target );
+		@files = find($target);
 		verbose "found " . scalar(@files) . " file(s)\n";
 	} elsif ( -f $target ) {
 		verbose "Found file '$target'\n";
@@ -247,6 +241,18 @@ sub blame {
 		verbose "[ok]\n";
 	}
 
+}
+
+sub find {
+	my $dir   = shift;
+	my $perl  = File::Find::Rule->perl_files;
+	my $build = File::Find::Rule->name('blib', '_build')->directory;
+	return dist($dir)
+		? File::Find::Rule->any(
+				$build->prune->discard,
+				$perl,
+		  )->in( $target )
+		: $perl->in( $target );
 }
 
 
@@ -281,6 +287,17 @@ sub format_version ($) {
 	} else {
 		return 'undef';
 	}
+}
+
+sub dist ($) {
+	my $dir = shift;
+	if ( -f File::Spec->catfile($dir, 'Makefile.PL') ) {
+		return 1;
+	}
+	if ( -f File::Spec->catfile($dir, 'Build.PL') ) {
+		return 1;
+	}
+	return '';
 }
 
 =pod

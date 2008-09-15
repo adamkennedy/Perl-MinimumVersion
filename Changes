@@ -1,5 +1,13 @@
 Revision history for Perl extension Perl::MinimumVersion
 
+1.19 Sun 14 Sep 2008
+	- Updating PPI and several other dependencies to get a more
+	  accurate parse on which to run the analysis.
+	- Add a dependency on File::Find::Rule::Perl instead of using
+	  a deplicate (worse) copy of the code for it.
+	- If perlver is run in a CPAN-style distribution don't parse
+	  blib or _build directories (but DO parse inc)
+
 1.18 Sat 23 Aug 2008
 	- Moving bin/perlver to more correct script/perlver
 	- Adding test for localising soft references (BDFOY)
