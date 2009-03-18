@@ -58,6 +58,8 @@ BEGIN {
 		_perl_5010_operators  => version->new('5.010'),
 		_perl_5010_magic      => version->new('5.010'),
 
+		_perl_5008_pragmas    => version->new('5.008'),
+
 		# Various small things
 		_bugfix_magic_errno   => version->new('5.008.003'),
 		_unquoted_versions    => version->new('5.008.001'),
@@ -98,11 +100,18 @@ BEGIN {
 			'%+'       => 1,
 			'%-'       => 1,
 		},
+		_perl_5008_pragmas => {
+			threads    => 1,
+			'threads::shared' => 1,
+			sort       => 1,
+		},
 		_perl_5006_pragmas => {
-			warnings   => 1,
+			warnings   => 1, #may be ported into older version
+			'warnings::register' => 1,
 			attributes => 1,
 			open       => 1,
 			filetest   => 1,
+			charnames  => 1,
 		},
 		_perl_5005_pragmas => {
 			re         => 1,
@@ -435,6 +444,14 @@ sub _perl_5010_magic {
 		$_[1]->isa('PPI::Token::Operator')
 		and
 		$MATCHES{_perl_5010_magic}->{$_[1]->content}
+	} );
+}
+
+sub _perl_5008_pragmas {
+	shift->Document->find_any( sub {
+		$_[1]->isa('PPI::Statement::Include')
+		and
+		$MATCHES{_perl_5008_pragmas}->{$_[1]->pragma}
 	} );
 }
 
