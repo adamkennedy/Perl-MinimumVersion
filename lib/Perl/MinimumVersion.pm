@@ -326,12 +326,15 @@ sub minimum_syntax_version {
 	}
 
 	# Look for the value
-	my $syntax = $self->_minimum_syntax_version( $limit );
+	my ($syntax, $check_failed) = $self->_minimum_syntax_version( $limit );
 
 	# If we found a value, it will be stable, cache it.
 	# If we did NOT, don't cache as subsequent runs without
 	# the filter may find a version.
-	$self->{syntax} = $syntax if $syntax;
+	if ($syntax) {
+		$self->{syntax} = $syntax;
+		$self->{syntax_check_failed} = $check_failed;
+	}
 	return $syntax;
 }
 
@@ -347,7 +350,8 @@ sub _minimum_syntax_version {
 	            grep { $CHECKS{$_}  >  $filter     }
 	            keys %CHECKS;
 
-	$check ? $CHECKS{$check} : '';
+	return ($CHECKS{$check},$check) if $check;
+	return ('','');
 }
 
 =pod
