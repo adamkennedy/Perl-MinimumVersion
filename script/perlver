@@ -16,7 +16,7 @@ perlver - The Perl Minimum Version Analyzer
   Scanning lib/Perl/MinimumVersion.pm... done
   Scanning t/01_compile.t... done
   Scanning t/02_main.t... done
-  
+
       ---------------------------------------------------------
     | file                       | explicit | syntax | external |
     | --------------------------------------------------------- |
@@ -24,9 +24,9 @@ perlver - The Perl Minimum Version Analyzer
     | t/01_compile.t             | ~        | ~      | n/a      |
     | t/02_main.t                | ~        | ~      | n/a      |
       ---------------------------------------------------------
-    
+
   Minimum version of Perl required: ...
-  
+
   adam@red:~$
 
 =head1 DESCRIPTION
@@ -55,13 +55,14 @@ sub error          (@);
 sub format_version ($);
 sub dist           ($);
 
-use vars qw{$VERSION $VERBOSE $BLAME};
+use vars qw{$VERSION $VERBOSE $BLAME $EXPLAIN};
 BEGIN {
 	$VERSION = '1.19';
 
 	# Configuration globals
 	$VERBOSE = '';
 	$BLAME   = '';
+	$EXPLAIN = '';
 
 	# Unbuffer output
 	$| = 1;
@@ -77,6 +78,7 @@ BEGIN {
 GetOptions(
 	verbose => \$VERBOSE,
 	blame   => \$BLAME,
+	explain => \$EXPLAIN,
 );
 
 # Get the target
@@ -245,14 +247,14 @@ sub blame {
 
 sub find {
 	my $dir   = shift;
-	my $perl  = File::Find::Rule->perl_files;
+	my $perl  = File::Find::Rule->perl_file;
 	my $build = File::Find::Rule->name('blib', '_build')->directory;
 	return dist($dir)
 		? File::Find::Rule->any(
 				$build->prune->discard,
 				$perl,
-		  )->in( $target )
-		: $perl->in( $target );
+		  )->in( $dir )
+		: $perl->in( $dir );
 }
 
 
