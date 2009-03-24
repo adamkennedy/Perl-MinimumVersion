@@ -664,9 +664,28 @@ sub _local_soft_reference {
 	} );
 }
 
-# sub _three_argument_open {
-#     ...to be written...
-# }
+sub _three_argument_open {
+	shift->Document->find_any( sub {
+		$_[1]->isa('PPI::Statement')  or return '';
+		my @children=$_[1]->children;
+		@children >= 7                or return '';
+		$children[0]->isa('PPI::Token::Word') or return '';
+		$children[0]->content eq 'open'       or return '';
+		my $comma=0;
+		foreach my $n (@children) {
+		  if ($n->isa('PPI::Token::Operator')) {
+		    if ($n->content eq ',') {
+		      $comma++;
+		    } else {
+		      return '';
+		    }
+		  }
+		}
+		return '' if $comma<2;
+		return 1;
+	} );
+
+}
 
 
 

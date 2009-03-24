@@ -5,6 +5,7 @@ Revision history for Perl extension Perl-MinimumVersion
         - CPAN::Exception should not trigger dependency on 5.5 (Alexandr Ciornii)
         - added undocumented option 'explain' in perlver (Alexandr Ciornii)
         - CHECK blocks (Alexandr Ciornii)
+        - first implementation of _three_argument_open and tests (Alexandr Ciornii)
 
 1.19 Sun 14 Sep 2008
 	- Updating PPI and several other dependencies to get a more
