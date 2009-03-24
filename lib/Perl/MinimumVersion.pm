@@ -46,7 +46,7 @@ use Exporter     ();
 
 use vars qw{$VERSION @ISA @EXPORT_OK %CHECKS %MATCHES};
 BEGIN {
-	$VERSION = '1.19';
+	$VERSION = '1.19_01';
 
 	# Export the PMV convenience constant
 	@ISA       = 'Exporter';
@@ -75,6 +75,7 @@ BEGIN {
 		_any_binary_literals  => version->new('5.006'),
 		_magic_version        => version->new('5.006'),
 		_any_attributes       => version->new('5.006'),
+		_any_CHECK_blocks     => version->new('5.006'),
 		# _three_argument_open  => version->new('5.006'),
 
 		_any_qr_tokens        => version->new('5.005_03'),
@@ -115,7 +116,7 @@ BEGIN {
 		},
 		_perl_5005_pragmas => {
 			re         => 1,
-			fields     => 1,
+			fields     => 1, #can be installed from CPAN, with base.pm
 			attr       => 1,
 		},
 	);
@@ -561,6 +562,14 @@ sub _magic_version {
 
 sub _any_attributes {
 	shift->Document->find_any( 'Token::Attribute' );
+}
+
+sub _any_CHECK_blocks {
+	shift->Document->find_any( sub {
+		$_[1]->isa('PPI::Statement::Scheduled')
+		and
+		$_[1]->type eq 'CHECK'
+	} );
 }
 
 sub _any_qr_tokens {

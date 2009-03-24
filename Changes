@@ -3,7 +3,8 @@ Revision history for Perl extension Perl-MinimumVersion
         - 5.8 and 5.6 pragmas (Alexandr Ciornii)
         - fixed error in perlver/find (Alexandr Ciornii)
         - CPAN::Exception should not trigger dependency on 5.5 (Alexandr Ciornii)
-        - added undocumented option 'explain' in perlver
+        - added undocumented option 'explain' in perlver (Alexandr Ciornii)
+        - CHECK blocks (Alexandr Ciornii)
 
 1.19 Sun 14 Sep 2008
 	- Updating PPI and several other dependencies to get a more
