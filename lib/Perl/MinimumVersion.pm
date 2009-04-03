@@ -38,15 +38,15 @@ use 5.005;
 use strict;
 use version      ();
 use Carp         ();
-use List::Util   ();
-use Params::Util '_INSTANCE', '_CLASS';
-use PPI::Util    '_Document';
-use PPI          ();
 use Exporter     ();
+use List::Util   ();
+use Params::Util ('_INSTANCE', '_CLASS');
+use PPI::Util    ('_Document');
+use PPI          ();
 
 use vars qw{$VERSION @ISA @EXPORT_OK %CHECKS %MATCHES};
 BEGIN {
-	$VERSION = '1.19_01';
+	$VERSION = '1.20';
 
 	# Export the PMV convenience constant
 	@ISA       = 'Exporter';
@@ -78,46 +78,46 @@ BEGIN {
 		_any_CHECK_blocks     => version->new('5.006'),
 		# _three_argument_open  => version->new('5.006'),
 
-		_any_qr_tokens        => version->new('5.005_03'),
+		_any_qr_tokens        => version->new('5.005.03'),
 		_perl_5005_pragmas    => version->new('5.005'),
 		_perl_5005_modules    => version->new('5.005'),
 		_any_tied_arrays      => version->new('5.005'),
 		_any_quotelike_regexp => version->new('5.005'),
 		_any_INIT_blocks      => version->new('5.005'),
-		);
+	);
 
 	# Predefine some indexes needed by various check methods
 	%MATCHES = (
 		_perl_5010_pragmas => {
-			mro        => 1,
-			feature    => 1,
+			mro     => 1,
+			feature => 1,
 		},
 		_perl_5010_operators => {
-			'//'       => 1,
-			'//='      => 1,
-			'~~'       => 1,
+			'//'  => 1,
+			'//=' => 1,
+			'~~'  => 1,
 		},
 		_perl_5010_magic => {
-			'%+'       => 1,
-			'%-'       => 1,
+			'%+' => 1,
+			'%-' => 1,
 		},
 		_perl_5008_pragmas => {
-			threads    => 1,
+			threads           => 1,
 			'threads::shared' => 1,
-			sort       => 1,
+			sort              => 1,
 		},
 		_perl_5006_pragmas => {
-			warnings   => 1, #may be ported into older version
+			warnings             => 1, #may be ported into older version
 			'warnings::register' => 1,
-			attributes => 1,
-			open       => 1,
-			filetest   => 1,
-			charnames  => 1,
+			attributes           => 1,
+			open                 => 1,
+			filetest             => 1,
+			charnames            => 1,
 		},
 		_perl_5005_pragmas => {
-			re         => 1,
-			fields     => 1, #can be installed from CPAN, with base.pm
-			attr       => 1,
+			re     => 1,
+			fields => 1, # can be installed from CPAN, with base.pm
+			attr   => 1,
 		},
 	);
 }
@@ -165,8 +165,7 @@ sub new {
 		explicit => undef,
 		syntax   => undef,
 		external => undef,
-
-		}, $class;
+	}, $class;
 
 	$self;
 }
@@ -180,7 +179,9 @@ back out of the version checker.
 
 =cut
 
-sub Document { $_[0]->{Document} }
+sub Document {
+	$_[0]->{Document}
+}
 
 
 
@@ -272,7 +273,7 @@ sub _minimum_explicit_version {
 		$_[1]->isa('PPI::Statement::Include') or return '';
 		$_[1]->version                        or return '';
 		1;
-		} );
+	} );
 	return $explicit unless $explicit;
 
 	# Convert to version objects
@@ -383,6 +384,7 @@ sub _minimum_external_version {
 	Carp::croak("Perl::MinimumVersion::minimum_external_version is not implemented");
 }
 
+=pod
 
 =head2 version_markers
 
@@ -403,24 +405,24 @@ sub version_markers {
 
 	my %markers;
 
-	if (my $explicit = $self->minimum_explicit_version) {
+	if ( my $explicit = $self->minimum_explicit_version ) {
 		$markers{ $explicit } = [ 'explicit' ];
 	}
 
-	for my $check (keys %CHECKS) {
+	foreach my $check ( keys %CHECKS ) {
 		next unless $self->$check();
 		my $markers = $markers{ $CHECKS{$check} } ||= [];
 		push @$markers, $check;
 	}
 
-	my @return;
+	my @rv;
 	my %marker_ver = map { $_ => version->new($_) } keys %markers;
 
-	for my $ver (sort { $marker_ver{$b} <=> $marker_ver{$a} } keys %markers) {
-		push @return, $marker_ver{$ver} => $markers{$ver};
+	foreach my $ver ( sort { $marker_ver{$b} <=> $marker_ver{$a} } keys %markers ) {
+		push @rv, $marker_ver{$ver} => $markers{$ver};
 	}
 
-	return @return;
+	return @rv;
 }
 
 
@@ -720,7 +722,7 @@ sub _max {
 =head1 BUGS
 
 B<Perl::MinimumVersion> does a reasonable job of catching the best-known
-explicit
+explicit version dependencies.
 
 B<However> it is exceedingly easy to add a new syntax check, so if you
 find something this is missing, copy and paste one of the existing
@@ -759,7 +761,7 @@ L<http://ali.as/>, L<PPI>, L<version>
 
 =head1 COPYRIGHT
 
-Copyright 2005 - 2008 Adam Kennedy.
+Copyright 2005 - 2009 Adam Kennedy.
 
 This program is free software; you can redistribute
 it and/or modify it under the same terms as Perl itself.

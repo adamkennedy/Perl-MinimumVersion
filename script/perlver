@@ -57,7 +57,7 @@ sub dist           ($);
 
 use vars qw{$VERSION $VERBOSE $BLAME $EXPLAIN};
 BEGIN {
-	$VERSION = '1.19_01';
+	$VERSION = '1.20';
 
 	# Configuration globals
 	$VERBOSE = '';
