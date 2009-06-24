@@ -1,5 +1,7 @@
 Revision history for Perl extension Perl-MinimumVersion
 
+        - add 'bytes' to 5.6 pragma (Alexandr Ciornii)
+
 1.20 Sat  4 Apr 2009
 	- Change 5.005_03 to 5.005.05 (ADAMK)
         - 5.8 and 5.6 pragmas (Alexandr Ciornii)

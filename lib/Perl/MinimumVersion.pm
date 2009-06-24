@@ -113,6 +113,7 @@ BEGIN {
 			open                 => 1,
 			filetest             => 1,
 			charnames            => 1,
+			bytes                => 1,
 		},
 		_perl_5005_pragmas => {
 			re     => 1,
