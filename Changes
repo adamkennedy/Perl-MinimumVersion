@@ -16,7 +16,7 @@ Revision history for Perl extension Perl-MinimumVersion
 	- Updating PPI and several other dependencies to get a more
 	  accurate parse on which to run the analysis.
 	- Add a dependency on File::Find::Rule::Perl instead of using
-	  a deplicate (worse) copy of the code for it.
+	  a duplicate (worse) copy of the code for it.
 	- If perlver is run in a CPAN-style distribution don't parse
 	  blib or _build directories (but DO parse inc)
 
