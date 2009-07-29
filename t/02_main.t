@@ -8,7 +8,7 @@ BEGIN {
 	$^W = 1;
 }
 
-use Test::More tests => 70;
+use Test::More tests => 74;
 use version;
 use File::Spec::Functions ':ALL';
 use PPI;
@@ -184,6 +184,14 @@ my $v = version_is( <<'END_PERL', '5.010', '"use mro" matches expected version' 
 use mro 'c3';
 END_PERL
 is( $v->_perl_5010_pragmas, 1, '->_any_our_variables returns true' );
+}
+
+# Check "version number"
+SCOPE: {
+my $v = version_is( <<'END_PERL', '5.006', '"version number" detected' );
+my $a=v1.1.1;
+END_PERL
+is( $v->_any_version_literals, 1, '->_any_version_literals returns true' );
 }
 
 # Check the localized soft refernence pragma

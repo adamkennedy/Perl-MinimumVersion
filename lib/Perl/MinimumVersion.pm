@@ -73,6 +73,7 @@ BEGIN {
 		_perl_5006_pragmas    => version->new('5.006'),
 		_any_our_variables    => version->new('5.006'),
 		_any_binary_literals  => version->new('5.006'),
+		_any_version_literals => version->new('5.006'), #v-string
 		_magic_version        => version->new('5.006'),
 		_any_attributes       => version->new('5.006'),
 		_any_CHECK_blocks     => version->new('5.006'),
@@ -554,6 +555,13 @@ sub _any_binary_literals {
 		$_[1]->{_subtype} eq 'binary'
 	} );	
 }
+
+sub _any_version_literals {
+	shift->Document->find_any( sub {
+		$_[1]->isa('PPI::Token::Number::Version')
+	} );	
+}
+
 
 sub _magic_version {
 	shift->Document->find_any( sub {
