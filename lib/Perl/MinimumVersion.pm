@@ -77,7 +77,7 @@ BEGIN {
 		_magic_version        => version->new('5.006'),
 		_any_attributes       => version->new('5.006'),
 		_any_CHECK_blocks     => version->new('5.006'),
-		# _three_argument_open  => version->new('5.006'),
+		_three_argument_open  => version->new('5.006'),
 
 		_any_qr_tokens        => version->new('5.005.03'),
 		_perl_5005_pragmas    => version->new('5.005'),
@@ -676,25 +676,229 @@ sub _local_soft_reference {
 	} );
 }
 
+
+
+
+# start code cargo-cult stolen from Perl::Critic
+our $SCOLON       = q{;};
+our $COMMA        = q{,};
+our $FATCOMMA     = q{=>};
+
+
+
+#-----------------------------------------------------------------------------
+## no critic (ProhibitNoisyQuotes);
+
+my %PRECEDENCE_OF = (
+    '->'   => 1,
+    '++'   => 2,
+    '--'   => 2,
+    '**'   => 3,
+    '!'    => 4,
+    '~'    => 4,
+    '\\'   => 4,
+    '=~'   => 5,
+    '!~'   => 5,
+    '*'    => 6,
+    '/'    => 6,
+    '%'    => 6,
+    'x'    => 6,
+    '+'    => 7,
+    '-'    => 7,
+    '.'    => 7,
+    '<<'   => 8,
+    '>>'   => 8,
+    '-R'   => 9,
+    '-W'   => 9,
+    '-X'   => 9,
+    '-r'   => 9,
+    '-w'   => 9,
+    '-x'   => 9,
+    '-e'   => 9,
+    '-O'   => 9,
+    '-o'   => 9,
+    '-z'   => 9,
+    '-s'   => 9,
+    '-M'   => 9,
+    '-A'   => 9,
+    '-C'   => 9,
+    '-S'   => 9,
+    '-c'   => 9,
+    '-b'   => 9,
+    '-f'   => 9,
+    '-d'   => 9,
+    '-p'   => 9,
+    '-l'   => 9,
+    '-u'   => 9,
+    '-g'   => 9,
+    '-k'   => 9,
+    '-t'   => 9,
+    '-T'   => 9,
+    '-B'   => 9,
+    '<'    => 10,
+    '>'    => 10,
+    '<='   => 10,
+    '>='   => 10,
+    'lt'   => 10,
+    'gt'   => 10,
+    'le'   => 10,
+    'ge'   => 10,
+    '=='   => 11,
+    '!='   => 11,
+    '<=>'  => 11,
+    'eq'   => 11,
+    'ne'   => 11,
+    'cmp'  => 11,
+    '~~'   => 11,
+    '&'    => 12,
+    '|'    => 13,
+    '^'    => 13,
+    '&&'   => 14,
+    '//'   => 15,
+    '||'   => 15,
+    '..'   => 16,
+    '...'  => 17,
+    '?'    => 18,
+    ':'    => 18,
+    '='    => 19,
+    '+='   => 19,
+    '-='   => 19,
+    '*='   => 19,
+    '/='   => 19,
+    '%='   => 19,
+    '||='  => 19,
+    '&&='  => 19,
+    '|='   => 19,
+    '&='   => 19,
+    '**='  => 19,
+    'x='   => 19,
+    '.='   => 19,
+    '^='   => 19,
+    '<<='  => 19,
+    '>>='  => 19,
+    ','    => 20,
+    '=>'   => 20,
+    'not'  => 22,
+    'and'  => 23,
+    'or'   => 24,
+    'xor'  => 24,
+);
+
+## use critic
+
+my $MIN_PRECEDENCE_TO_TERMINATE_PARENLESS_ARG_LIST = precedence_of( 'not' );
+sub precedence_of {
+    my $elem = shift;
+    return if !$elem;
+    return $PRECEDENCE_OF{ ref $elem ? "$elem" : $elem };
+}
+
+sub is_ppi_expression_or_generic_statement {
+    my $element = shift;
+
+    #return if not $element;
+    die if not $element->isa('PPI::Statement');
+    return if not $element->isa('PPI::Statement');
+    return 1 if $element->isa('PPI::Statement::Expression');
+
+    my $element_class = blessed($element);
+
+    return if not $element_class;
+    return $element_class eq 'PPI::Statement';
+}
+
+sub parse_arg_list {
+    my $elem = shift;
+    die if not $elem->isa('PPI::Element');
+    my $sib  = $elem->snext_sibling();
+    return if !$sib;
+
+    if ( $sib->isa('PPI::Structure::List') ) {
+
+        #Pull siblings from list
+        my @list_contents = $sib->schildren();
+        return if not @list_contents;
+
+        my @list_expressions;
+        foreach my $item (@list_contents) {
+            if (
+                is_ppi_expression_or_generic_statement($item)
+            ) {
+                push
+                    @list_expressions,
+                    split_nodes_on_comma( $item->schildren() );
+            }
+            else {
+                push @list_expressions, $item;
+            }
+        }
+
+        return @list_expressions;
+    }
+    else {
+
+        #Gather up remaining nodes in the statement
+        my $iter     = $elem;
+        my @arg_list = ();
+
+        while ($iter = $iter->snext_sibling() ) {
+            last if $iter->isa('PPI::Token::Structure') and $iter eq $SCOLON;
+            last if $iter->isa('PPI::Token::Operator')
+                and $MIN_PRECEDENCE_TO_TERMINATE_PARENLESS_ARG_LIST <=
+                    precedence_of( $iter );
+            push @arg_list, $iter;
+        }
+        return split_nodes_on_comma( @arg_list );
+    }
+}
+
+#---------------------------------
+
+sub split_nodes_on_comma {
+    my @nodes = @_;
+
+    my $i = 0;
+    my @node_stacks;
+    for my $node (@nodes) {
+        if (
+                $node->isa('PPI::Token::Operator')
+            and ($node eq $COMMA or $node eq $FATCOMMA)
+        ) {
+            if (@node_stacks) {
+                $i++; #Move forward to next 'node stack'
+            }
+            next;
+        } elsif ( $node->isa('PPI::Token::QuoteLike::Words' )) {
+            my $section = $node->{sections}->[0];
+            my @words = words_from_string(substr $node->content, $section->{position}, $section->{size});
+            my $loc = $node->location;
+            for my $word (@words) {
+                my $token = PPI::Token::Quote::Single->new(q{'} . $word . q{'});
+                $token->{_location} = $loc;
+                push @{ $node_stacks[$i++] }, $token;
+            }
+            next;
+        }
+        push @{ $node_stacks[$i] }, $node;
+    }
+    return @node_stacks;
+}
+
+# end code from Perl::Critic
+
 sub _three_argument_open {
 	shift->Document->find_any( sub {
 		$_[1]->isa('PPI::Statement')  or return '';
 		my @children=$_[1]->children;
 		@children >= 7                or return '';
-		$children[0]->isa('PPI::Token::Word') or return '';
-		$children[0]->content eq 'open'       or return '';
-		my $comma=0;
-		foreach my $n (@children) {
-		  if ($n->isa('PPI::Token::Operator')) {
-		    if ($n->content eq ',') {
-		      $comma++;
-		    } else {
-		      return '';
-		    }
-		  }
+		my $main_element=$children[0];
+		$main_element->isa('PPI::Token::Word') or return '';
+		$main_element->content eq 'open'       or return '';
+		my @arguments = parse_arg_list($main_element);
+		if ( scalar @arguments > 2 ) {
+			return 1;
 		}
-		return '' if $comma<2;
-		return 1;
+		return '';
 	} );
 
 }

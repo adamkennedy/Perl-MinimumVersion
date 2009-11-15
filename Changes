@@ -3,6 +3,9 @@ Revision history for Perl extension Perl-MinimumVersion
         - add 'bytes' to 5.6 pragma (Alexandr Ciornii)
         - add support for "version numbers" like "v1.1.1" (Alexandr Ciornii)
         - XML::SAX::Exception should not trigger dependency on 5.5 (Alexandr Ciornii)
+        - steal argument counting code from Perl::Critic,
+          reimplement _three_argument_open, more tests (Alexandr Ciornii)
+          Now check for 3-arg open is working.
 
 1.20 Sat  4 Apr 2009
 	- Change 5.005_03 to 5.005.05 (ADAMK)
