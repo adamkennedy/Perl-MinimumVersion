@@ -85,6 +85,7 @@ BEGIN {
 		_any_tied_arrays      => version->new('5.005'),
 		_any_quotelike_regexp => version->new('5.005'),
 		_any_INIT_blocks      => version->new('5.005'),
+		_substr_4_arg         => version->new('5.005'),
 	);
 
 	# Predefine some indexes needed by various check methods
@@ -903,6 +904,19 @@ sub _three_argument_open {
 
 }
 
+
+sub _substr_4_arg {
+	shift->Document->find_any( sub {
+		my $main_element=$_[1];
+		$main_element->isa('PPI::Token::Word') or return '';
+		$main_element->content eq 'substr'       or return '';
+		my @arguments = parse_arg_list($main_element);
+		if ( scalar @arguments > 3 ) {
+			return 1;
+		}
+		return '';
+	} );
+}
 
 
 
