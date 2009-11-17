@@ -86,6 +86,8 @@ BEGIN {
 		_any_quotelike_regexp => version->new('5.005'),
 		_any_INIT_blocks      => version->new('5.005'),
 		_substr_4_arg         => version->new('5.005'),
+
+		_postfix_foreach      => version->new('5.004.05'),
 	);
 
 	# Predefine some indexes needed by various check methods
@@ -918,8 +920,9 @@ sub _substr_4_arg {
 	} );
 }
 
-
-
+sub _postfix_foreach {
+        return ''; #stub
+}
 
 #####################################################################
 # Support Functions
