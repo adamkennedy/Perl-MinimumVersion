@@ -610,7 +610,7 @@ sub _perl_5005_modules {
 			$_[1]->module eq 'Tie::Array'
 			or
 			($_[1]->module =~ /\bException\b/ and
-				$_[1]->module !~ /^(?:CPAN|XML::SAX)::/)
+				$_[1]->module !~ /^(?:CPAN)::/)
 			or
 			$_[1]->module =~ /\bThread\b/
 			or
