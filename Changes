@@ -1,8 +1,9 @@
 Revision history for Perl extension Perl-MinimumVersion
 
-        - add 'bytes' to 5.6 pragma (Alexandr Ciornii)
-        - add support for "version numbers" like "v1.1.1" (Alexandr Ciornii)
-        - steal argument counting code from Perl::Critic,
+1.21 ?
+        - Add 'bytes' to 5.6 pragma (Alexandr Ciornii)
+        - Add support for "version numbers" like "v1.1.1" (Alexandr Ciornii)
+        - Steal argument counting code from Perl::Critic,
           reimplement _three_argument_open, more tests (Alexandr Ciornii)
           Now check for 3-arg open is working.
         - Check 4-arg substr that requires perl 5.5 (Alexandr Ciornii)
