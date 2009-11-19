@@ -79,6 +79,7 @@ BEGIN {
 		_any_attributes       => version->new('5.006'),
 		_any_CHECK_blocks     => version->new('5.006'),
 		_three_argument_open  => version->new('5.006'),
+		_weaken               => version->new('5.006'),
 
 		_any_qr_tokens        => version->new('5.005.03'),
 		_perl_5005_pragmas    => version->new('5.005'),
@@ -727,6 +728,33 @@ sub _postfix_foreach {
 		return 1;
 	} );
 }
+
+# weak references require perl 5.6
+# will not work in case of importing several
+sub _weaken {
+	shift->Document->find_any( sub {
+		(
+			$_[1]->isa('PPI::Statement::Include')
+			and
+			$_[1]->module eq 'Scalar::Util'
+			and
+			$_[1]->content =~ /[^:]\b(?:weaken|isweak)\b[^:]/
+		)
+		or
+		(
+			$_[1]->isa('PPI::Token::Word')
+			and
+			(
+				$_[1]->content eq 'Scalar::Util::isweak'
+				or
+				$_[1]->content eq 'Scalar::Util::weaken'
+			)
+			#and
+			#is_function_call($_[1])
+		)
+	} );
+}
+
 
 #####################################################################
 # Support Functions

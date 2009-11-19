@@ -8,6 +8,7 @@ Revision history for Perl extension Perl-MinimumVersion
           Now check for 3-arg open is working.
         - Check 4-arg substr that requires perl 5.5 (Alexandr Ciornii)
         - Postfix foreach requires perl 5.004.05 (Alexandr Ciornii)
+        - Scalar::Util::weaken requires perl 5.006 (Alexandr Ciornii)
 
 1.20 Sat  4 Apr 2009
 	- Change 5.005_03 to 5.005.05 (ADAMK)
