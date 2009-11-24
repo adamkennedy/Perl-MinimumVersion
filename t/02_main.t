@@ -55,12 +55,12 @@ is_deeply( Perl::MinimumVersion::_max(version->new(5.006), version->new(5.004)),
 	version->new(5.006),
 	'_max(two) returns the higher version' );
 
-is_deeply( Perl::MinimumVersion::_max(version->new(5.006), version->new(5.004), version->new(5.5.3)),
+is_deeply( Perl::MinimumVersion::_max(version->new(5.006), version->new(5.004), version->new('5.5.3')),
 	version->new(5.006),
 	'_max(three) returns the higher version' );
 
-is_deeply( Perl::MinimumVersion::_max(version->new(5.006), version->new(5.8.4), undef, version->new(5.004), '', version->new(5.5.3)),
-	version->new(5.8.4),
+is_deeply( Perl::MinimumVersion::_max(version->new(5.006), version->new('5.8.4'), undef, version->new(5.004), '', version->new('5.5.3')),
+	version->new('5.8.4'),
 	'_max(three) returns the higher version' );
 
 # Check the _max support function (bad)
@@ -85,12 +85,12 @@ is_deeply( PMV->_max(version->new(5.006), version->new(5.004)),
 	version->new(5.006),
 	'_max(two) returns the higher version (as method)' );
 
-is_deeply( PMV->_max(version->new(5.006), version->new(5.004), version->new(5.5.3)),
+is_deeply( PMV->_max(version->new(5.006), version->new(5.004), version->new('5.5.3')),
 	version->new(5.006),
 	'_max(three) returns the higher version (as method)' );
 
-is_deeply( PMV->_max(version->new(5.006), version->new(5.8.4), undef, version->new(5.004), '', version->new(5.5.3)),
-	version->new(5.8.4),
+is_deeply( PMV->_max(version->new(5.006), version->new('5.8.4'), undef, version->new(5.004), '', version->new('5.5.3')),
+	version->new('5.8.4'),
 	'_max(three) returns the higher version (as method)' );
 
 # Constructor testing
