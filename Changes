@@ -1,15 +1,15 @@
 Revision history for Perl extension Perl-MinimumVersion
 
-        - negative length in splice requires perl 5.5 (Alexandr Ciornii)
-        - mkdir with one argument requires perl 5.6 (Alexandr Ciornii)
-        - substr will not be checked if it is a method name (Alexandr Ciornii)
-        - better tests and fix for 3-arg open (Alexandr Ciornii)
+1.22 Wed  25 Nov 2009
+        - Negative length in 'splice' requires perl 5.5 (Alexandr Ciornii)
+        - 'mkdir' with one argument requires perl 5.6 (Alexandr Ciornii)
+        - 'substr' will not be checked if it is a method name (Alexandr Ciornii)
+        - better tests and fix for 3-arg 'open' (Alexandr Ciornii)
 
 1.21 Tue  24 Nov 2009
         - Add 'bytes' to 5.6 pragma (Alexandr Ciornii)
         - Add support for "version numbers" like "v1.1.1" (Alexandr Ciornii)
-        - Steal argument counting code from Perl::Critic,
-          reimplement _three_argument_open, more tests (Alexandr Ciornii)
+        - Reimplement _three_argument_open, more tests (Alexandr Ciornii)
           Now check for 3-arg open is working.
         - Check 4-arg substr that requires perl 5.5 (Alexandr Ciornii)
         - Postfix foreach requires perl 5.004.05 (Alexandr Ciornii)

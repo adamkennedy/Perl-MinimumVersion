@@ -47,7 +47,7 @@ use Perl::Critic::Utils 1.104 qw{ :characters :severities :data_conversion :clas
 
 use vars qw{$VERSION @ISA @EXPORT_OK %CHECKS %MATCHES};
 BEGIN {
-	$VERSION = '1.21';
+	$VERSION = '1.22';
 
 	# Export the PMV convenience constant
 	@ISA       = 'Exporter';
