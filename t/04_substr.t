@@ -19,7 +19,7 @@ my @examples_not=(
 my @examples_yes=(
     q{substr('asdf',1,1,'tt');},
     q{my $a=substr('asdf',1,1,'aa');},
-    q{if(substr('asdf',1,1,'aa')) {}},
+    q/if(substr('asdf',1,1,'aa')) {}/,
 );
 plan tests =>(@examples_yes+@examples_not);
 foreach my $example (@examples_not) {
