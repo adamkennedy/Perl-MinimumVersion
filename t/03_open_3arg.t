@@ -22,15 +22,16 @@ my @examples_not3arg=(
 my @examples_3arg=(
     q{open A,'<','test.txt';},
     q{open( INFO, ">", $datafile ) || die "Can't create $datafile: $!";},
+    q{open( INFO, ">", $datafile )},
     q{open my $fh, '>', $output;},
     q{open my $fh, '|-', 'test','arg1';},
 );
 plan tests =>(@examples_3arg+@examples_not3arg);
 foreach my $example (@examples_not3arg) {
         my $p = Perl::MinimumVersion->new(\$example);
-        is($p->_three_argument_open,'');
+        is($p->_three_argument_open,'',$example);
 }
 foreach my $example (@examples_3arg) {
         my $p = Perl::MinimumVersion->new(\$example);
-        is($p->_three_argument_open,1);
+        is($p->_three_argument_open,1,$example);
 }

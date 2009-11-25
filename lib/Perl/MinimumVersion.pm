@@ -686,7 +686,7 @@ sub _three_argument_open {
 	shift->Document->find_any( sub {
 		$_[1]->isa('PPI::Statement')  or return '';
 		my @children=$_[1]->children;
-		@children >= 7                or return '';
+		#@children >= 7                or return '';
 		my $main_element=$children[0];
 		$main_element->isa('PPI::Token::Word') or return '';
 		$main_element->content eq 'open'       or return '';
