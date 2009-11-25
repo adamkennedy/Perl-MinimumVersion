@@ -11,24 +11,22 @@ use Test::More;
 #use version;
 use Perl::MinimumVersion;
 my @examples_not=(
-    q{splice(@a,1);},
-    q{splice @a,1;},
-    q{splice @a,1,1;},
-    q{splice @a,1,1,@b;},
-    q{splice @a,1 or die -1,1;},
-    q{$test->splice(@a,1,-1,@b);},
+    q{mkdir1('test',1);},
+    q{mkdir('test',1);},
+    q{mkdir 'test',1;},
+    q{$test->mkdir('a');},
 );
 my @examples_yes=(
-    q{splice @a,1,-1;},
-    q{splice(@a,1,-1);},
-    q{$c=splice(@a,1,-1);},
+    q{mkdir('test');},
+    q{mkdir 'test';},
+    q{$c=mkdir('test');},
 );
 plan tests =>(@examples_not+@examples_yes);
 foreach my $example (@examples_not) {
         my $p = Perl::MinimumVersion->new(\$example);
-        is($p->_splice_negative_length,'',$example) or do {diag "\$\@: $@" if $@};
+        is($p->_mkdir_1_arg,'',$example) or do {diag "\$\@: $@" if $@};
 }
 foreach my $example (@examples_yes) {
         my $p = Perl::MinimumVersion->new(\$example);
-        is($p->_splice_negative_length,1,$example) or do {diag "\$\@: $@" if $@};
+        is($p->_mkdir_1_arg,1,$example) or do {diag "\$\@: $@" if $@};
 }

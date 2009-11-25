@@ -80,6 +80,7 @@ BEGIN {
 		_any_CHECK_blocks     => version->new('5.006'),
 		_three_argument_open  => version->new('5.006'),
 		_weaken               => version->new('5.006'),
+		_mkdir_1_arg          => version->new('5.006'),
 
 		_any_qr_tokens        => version->new('5.005.03'),
 		_perl_5005_pragmas    => version->new('5.005'),
@@ -712,6 +713,24 @@ sub _substr_4_arg {
 		return '' if is_package_declaration($main_element);
 		my @arguments = parse_arg_list($main_element);
 		if ( scalar @arguments > 3 ) {
+			return 1;
+		}
+		return '';
+	} );
+}
+
+sub _mkdir_1_arg {
+	shift->Document->find_any( sub {
+		my $main_element=$_[1];
+		$main_element->isa('PPI::Token::Word') or return '';
+		$main_element->content eq 'mkdir'       or return '';
+		return '' if is_hash_key($main_element);
+		return '' if is_method_call($main_element);
+		return '' if is_subroutine_name($main_element);
+		return '' if is_included_module_name($main_element);
+		return '' if is_package_declaration($main_element);
+		my @arguments = parse_arg_list($main_element);
+		if ( scalar @arguments != 2 ) {
 			return 1;
 		}
 		return '';
