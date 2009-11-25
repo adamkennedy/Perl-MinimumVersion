@@ -14,6 +14,7 @@ my @examples_not=(
     q{substr 'asdf',1,1 or print 2,2;},
     q{substr('asdf',1,1);},
     q{my $a=substr('asdf',1,1);},
+    q{$a->substr('asdf',1,1,'aa');},
 );
 my @examples_yes=(
     q{substr('asdf',1,1,'tt');},

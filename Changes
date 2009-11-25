@@ -1,5 +1,7 @@
 Revision history for Perl extension Perl-MinimumVersion
 
+        - substr will not be checked if it is a method name
+
 1.21 Tue  24 Nov 2009
         - Add 'bytes' to 5.6 pragma (Alexandr Ciornii)
         - Add support for "version numbers" like "v1.1.1" (Alexandr Ciornii)
