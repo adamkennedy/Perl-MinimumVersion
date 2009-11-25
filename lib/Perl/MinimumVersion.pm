@@ -620,6 +620,8 @@ sub _perl_5005_modules {
 			$_[1]->module =~ /^Error\b/
 			or
 			$_[1]->module eq 'base'
+			or
+			$_[1]->module eq 'Errno'
 		)
 	} );
 }
