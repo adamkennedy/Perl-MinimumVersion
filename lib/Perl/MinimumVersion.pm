@@ -88,6 +88,7 @@ BEGIN {
 		_any_quotelike_regexp => version->new('5.005'),
 		_any_INIT_blocks      => version->new('5.005'),
 		_substr_4_arg         => version->new('5.005'),
+		_splice_negative_length => version->new('5.005'),
 
 		_postfix_foreach      => version->new('5.004.05'),
 	);
@@ -715,6 +716,37 @@ sub _substr_4_arg {
 		}
 		return '';
 	} );
+}
+
+sub _splice_negative_length {
+	shift->Document->find_any( sub {
+		my $main_element=$_[1];
+		$main_element->isa('PPI::Token::Word') or return '';
+		$main_element->content eq 'splice'       or return '';
+		return '' if is_hash_key($main_element);
+		return '' if is_method_call($main_element);
+		return '' if is_subroutine_name($main_element);
+		return '' if is_included_module_name($main_element);
+		return '' if is_package_declaration($main_element);
+
+		my @arguments = parse_arg_list($main_element);
+		if ( scalar @arguments < 3 ) {
+			return '';
+		}
+		my $arg=$arguments[2];
+		if (ref($arg) eq 'ARRAY') {
+		  $arg=$arg->[0];
+		}
+		if ($arg->isa('PPI::Token::Number')) {
+			if ($arg->literal<0) {
+				return 1;
+			} else {
+				return '';
+			}
+		}
+		return '';
+	} );
+
 }
 
 sub _postfix_foreach {
