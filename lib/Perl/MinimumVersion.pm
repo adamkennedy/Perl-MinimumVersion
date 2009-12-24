@@ -34,7 +34,7 @@ covers it.
 
 =cut
 
-use 5.005;
+use 5.006;
 use strict;
 use version      ();
 use Carp         ();
