@@ -43,7 +43,13 @@ use List::Util   ();
 use Params::Util ('_INSTANCE', '_CLASS');
 use PPI::Util    ('_Document');
 use PPI          ();
-use Perl::Critic::Utils 1.104 qw{ :characters :severities :data_conversion :classification :ppi};
+use Perl::Critic::Utils 1.104 qw{
+	:characters
+	:severities
+	:data_conversion
+	:classification
+	:ppi
+};
 
 use vars qw{$VERSION @ISA @EXPORT_OK %CHECKS %MATCHES};
 BEGIN {
@@ -67,6 +73,7 @@ BEGIN {
 		_constant_hash        => version->new('5.008'),
 		_use_base_exporter    => version->new('5.008'),
 		_local_soft_reference => version->new('5.008'),
+		_use_carp_version     => version->new('5.008'),
 
 		# Included in 5.6. Broken until 5.8
 		_pragma_utf8          => version->new('5.008'),
@@ -685,6 +692,16 @@ sub _local_soft_reference {
 	} );
 }
 
+# Carp.pm did not have a $VERSION in 5.6.2
+# Therefore, even "use Carp 0" imposes a 5.8.0 dependency.
+sub _use_carp_version {
+	shift->Document->find_any( sub {
+		$_[1]->isa('PPI::Statement::Include') or return '';
+		$_[1]->module eq 'Carp'               or return '';
+		return !! length $_[1]->version;
+	} );
+}
+
 sub _three_argument_open {
 	shift->Document->find_any( sub {
 		$_[1]->isa('PPI::Statement')  or return '';
@@ -699,7 +716,6 @@ sub _three_argument_open {
 		}
 		return '';
 	} );
-
 }
 
 
