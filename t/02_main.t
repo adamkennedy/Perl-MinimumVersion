@@ -122,7 +122,7 @@ SCOPE: {
 my $v = version_is( <<'END_PERL', '5.006', '"our" matches expected version' );
 our $foo = 'bar';
 END_PERL
-is( $v->_any_our_variables, 1, '->_any_our_variables returns true' );
+ok( $v->_any_our_variables, '->_any_our_variables returns true' );
 }
 
 # Try with attributes
@@ -130,7 +130,7 @@ SCOPE: {
 my $v = version_is( <<'END_PERL', '5.006', '"attributes" matches expected version' );
 sub foo : attribute { 1 };
 END_PERL
-is( $v->_any_attributes, 1, '->_any_attributes returns true' );
+ok( $v->_any_attributes, '->_any_attributes returns true' );
 }
 
 # Check with a complex explicit
@@ -170,10 +170,8 @@ END_PERL
 
 # Check regular use of constants
 SCOPE: {
-### IS THIS CORRECT?
-my $v = version_is( <<'END_PERL', '5.004', 'constant hash adds a 5.008 dep' );
+my $v = version_is( <<'END_PERL', '5.004', 'normal constant use has no dep' );
 use constant FOO => 1;
-};
 1;
 END_PERL
 }
@@ -183,7 +181,7 @@ SCOPE: {
 my $v = version_is( <<'END_PERL', '5.010', '"use mro" matches expected version' );
 use mro 'c3';
 END_PERL
-is( $v->_perl_5010_pragmas, 1, '->_any_our_variables returns true' );
+ok( $v->_perl_5010_pragmas, '->_any_our_variables returns true' );
 }
 
 # Check "version number"
@@ -191,7 +189,7 @@ SCOPE: {
 my $v = version_is( <<'END_PERL', '5.006', '"version number" detected' );
 my $a=v1.1.1;
 END_PERL
-is( $v->_any_version_literals, 1, '->_any_version_literals returns true' );
+ok( $v->_any_version_literals, '->_any_version_literals returns true' );
 }
 
 # Check the localized soft refernence pragma
@@ -199,7 +197,7 @@ SCOPE: {
 my $v = version_is( <<'END_PERL', '5.008', 'Localized soft reference matched expected version' );
 local ${ "${class}::DIE" } = 1;
 END_PERL
-is( $v->_local_soft_reference, 1, '->_local_soft_reference returns true' );
+ok( $v->_local_soft_reference, '->_local_soft_reference returns true' );
 }
 
 # Check that minimum_syntax_version's limit param is respected

@@ -51,9 +51,14 @@ use Perl::Critic::Utils 1.104 qw{
 	:ppi
 };
 
+use Perl::MinimumVersion::Reason ();
+
 use vars qw{$VERSION @ISA @EXPORT_OK %CHECKS %MATCHES};
 BEGIN {
-	$VERSION = '1.22';
+	$VERSION = '1.23_01';
+
+	# Only needed for dev releases, comment out otherwise
+	$VERSION = eval $VERSION;
 
 	# Export the PMV convenience constant
 	@ISA       = 'Exporter';
@@ -61,44 +66,43 @@ BEGIN {
 
 	# The primary list of version checks
 	%CHECKS = (
-		_perl_5010_pragmas    => version->new('5.010'),
-		_perl_5010_operators  => version->new('5.010'),
-		_perl_5010_magic      => version->new('5.010'),
-
-		_perl_5008_pragmas    => version->new('5.008'),
+		_perl_5010_pragmas      => version->new('5.010'),
+		_perl_5010_operators    => version->new('5.010'),
+		_perl_5010_magic        => version->new('5.010'),
 
 		# Various small things
-		_bugfix_magic_errno   => version->new('5.008.003'),
-		_unquoted_versions    => version->new('5.008.001'),
-		_constant_hash        => version->new('5.008'),
-		_use_base_exporter    => version->new('5.008'),
-		_local_soft_reference => version->new('5.008'),
-		_use_carp_version     => version->new('5.008'),
+		_bugfix_magic_errno     => version->new('5.008.003'),
+		_unquoted_versions      => version->new('5.008.001'),
+		_perl_5008_pragmas      => version->new('5.008'),
+		_constant_hash          => version->new('5.008'),
+		_use_base_exporter      => version->new('5.008'),
+		_local_soft_reference   => version->new('5.008'),
+		_use_carp_version       => version->new('5.008'),
 
 		# Included in 5.6. Broken until 5.8
-		_pragma_utf8          => version->new('5.008'),
+		_pragma_utf8            => version->new('5.008'),
 
-		_perl_5006_pragmas    => version->new('5.006'),
-		_any_our_variables    => version->new('5.006'),
-		_any_binary_literals  => version->new('5.006'),
-		_any_version_literals => version->new('5.006'), #v-string
-		_magic_version        => version->new('5.006'),
-		_any_attributes       => version->new('5.006'),
-		_any_CHECK_blocks     => version->new('5.006'),
-		_three_argument_open  => version->new('5.006'),
-		_weaken               => version->new('5.006'),
-		_mkdir_1_arg          => version->new('5.006'),
+		_perl_5006_pragmas      => version->new('5.006'),
+		_any_our_variables      => version->new('5.006'),
+		_any_binary_literals    => version->new('5.006'),
+		_any_version_literals   => version->new('5.006'), #v-string
+		_magic_version          => version->new('5.006'),
+		_any_attributes         => version->new('5.006'),
+		_any_CHECK_blocks       => version->new('5.006'),
+		_three_argument_open    => version->new('5.006'),
+		_weaken                 => version->new('5.006'),
+		_mkdir_1_arg            => version->new('5.006'),
 
-		_any_qr_tokens        => version->new('5.005.03'),
-		_perl_5005_pragmas    => version->new('5.005'),
-		_perl_5005_modules    => version->new('5.005'),
-		_any_tied_arrays      => version->new('5.005'),
-		_any_quotelike_regexp => version->new('5.005'),
-		_any_INIT_blocks      => version->new('5.005'),
-		_substr_4_arg         => version->new('5.005'),
+		_any_qr_tokens          => version->new('5.005.03'),
+		_perl_5005_pragmas      => version->new('5.005'),
+		_perl_5005_modules      => version->new('5.005'),
+		_any_tied_arrays        => version->new('5.005'),
+		_any_quotelike_regexp   => version->new('5.005'),
+		_any_INIT_blocks        => version->new('5.005'),
+		_substr_4_arg           => version->new('5.005'),
 		_splice_negative_length => version->new('5.005'),
 
-		_postfix_foreach      => version->new('5.004.05'),
+		_postfix_foreach        => version->new('5.004.05'),
 	);
 
 	# Predefine some indexes needed by various check methods
@@ -221,7 +225,7 @@ Returns a L<version> object, or C<undef> on error.
 =cut
 
 sub minimum_version {
-	my $self    = _self(@_) or return undef;
+	my $self    = _SELF(\@_) or return undef;
 	my $minimum = $self->{default}; # Sensible default
 
 	# Is the explicit version greater?
@@ -234,16 +238,10 @@ sub minimum_version {
 	# Is the syntax version greater?
 	# Since this is the most expensive operation (for this file),
 	# we need to be careful we don't run things we don't need to.
-	if ( defined $self->{syntax} ) {
-		if ( $self->{syntax} and $self->{syntax} > $minimum ) {
-			$minimum = $self->{syntax};
-		}
-	} else {
-		my $syntax = $self->minimum_syntax_version;
-		return undef unless defined $syntax;
-		if ( $syntax and $syntax > $minimum ) {
-			$minimum = $syntax;
-		}
+	my $syntax = $self->minimum_syntax_version;
+	return undef unless defined $syntax;
+	if ( $syntax and $syntax > $minimum ) {
+		$minimum = $syntax;
 	}
 
 	### FIXME - Disabled until minimum_external_version completed
@@ -255,6 +253,27 @@ sub minimum_version {
 	#}
 
 	$minimum;
+}
+
+sub minimum_reason {
+	my $self    = _SELF(\@_) or return undef;
+	my $minimum = $self->default_reason; # Sensible default
+
+	# Is the explicit version greater?
+	my $explicit = $self->minimum_explicit_version;
+	return undef unless defined $explicit;
+	if ( $explicit and $explicit > $minimum ) {
+		$minimum = $explicit;
+	}
+
+}
+
+sub default_reason {
+	Perl::MinimumVersion->new(
+		rule    => 'default',
+		version => $_[0]->{default},
+		element => undef,
+	);
 }
 
 =pod
@@ -276,11 +295,17 @@ or C<undef> on error.
 =cut
 
 sub minimum_explicit_version {
-	my $self = _self(@_) or return undef;
+	my $self   = _SELF(\@_) or return undef;
+	my $reason = $self->minimum_explicit_reason(@_);
+	return $reason ? $reason->version : $reason;
+}
+
+sub minimum_explicit_reason {
+	my $self = _SELF(\@_) or return undef;
 	unless ( defined $self->{explicit} ) {
 		$self->{explicit} = $self->_minimum_explicit_version;
 	}
-	$self->{explicit};
+	return $self->{explicit};
 }
 
 sub _minimum_explicit_version {
@@ -292,10 +317,22 @@ sub _minimum_explicit_version {
 	} );
 	return $explicit unless $explicit;
 
-	# Convert to version objects
-	List::Util::max map { version->new($_) }
-	                map { $_->version      }
-	                @$explicit;
+	# Find the highest version
+	my $max     = undef;
+	my $element = undef;
+	foreach my $include ( @$explicit ) {
+		my $version = version->new($include->version);
+		if ( $version > $max or not $element ) {
+			$max     = $version;
+			$element = $include;
+		}
+	}
+
+	return Perl::MinimumVersion::Reason->new(
+		rule    => 'explicit',
+		version => $max,
+		element => $element,
+	);
 }
 
 =pod
@@ -318,7 +355,7 @@ artifically low results, but should not artificially high results.
 
 For example, if C<minimum_syntax_version> returned 5.006, you can be
 confident it will not run on anything lower, although there is a chance
-that during actual execution it may use some untestable  feature that
+that during actual execution it may use some untestable feature that
 creates a dependency on a higher version.
 
 Returns a L<version> object, false if no dependencies could be found,
@@ -327,9 +364,15 @@ or C<undef> on error.
 =cut
 
 sub minimum_syntax_version {
-	my $self  = _self(@_) or return undef;
-	my $limit = ref($_[0]) ? $_[1] : $_[2];
-	if ( defined $limit and ! _INSTANCE($limit, 'version') ) {
+	my $self   = _SELF(\@_) or return undef;
+	my $reason = $self->minimum_syntax_reason(@_);
+	return $reason ? $reason->version : $reason;
+}
+
+sub minimum_syntax_reason {
+	my $self  = _SELF(\@_) or return undef;
+	my $limit = shift;
+	if ( defined $limit and not _INSTANCE($limit, 'version') ) {
 		$limit = version->new("$limit");
 	}
 	if ( defined $self->{syntax} ) {
@@ -344,16 +387,17 @@ sub minimum_syntax_version {
 	}
 
 	# Look for the value
-	my ($syntax, $check_failed) = $self->_minimum_syntax_version( $limit );
+	my $syntax = $self->_minimum_syntax_version( $limit );
 
 	# If we found a value, it will be stable, cache it.
 	# If we did NOT, don't cache as subsequent runs without
 	# the filter may find a version.
-	if ($syntax) {
+	if ( $syntax ) {
 		$self->{syntax} = $syntax;
-		$self->{syntax_check_failed} = $check_failed;
+		return $self->{syntax};
 	}
-	return $syntax;
+
+	return '';
 }
 
 sub _minimum_syntax_version {
@@ -363,13 +407,25 @@ sub _minimum_syntax_version {
 	# Always check in descending version order.
 	# By doing it this way, the version of the first check that matches
 	# is also the version of the document as a whole.
-	my $check = List::Util::first { $self->$_()    }
-	            sort { $CHECKS{$b} <=> $CHECKS{$a} }
-	            grep { $CHECKS{$_}  >  $filter     }
-	            keys %CHECKS;
+	my @rules = sort {
+		$CHECKS{$b} <=> $CHECKS{$a}
+	} grep {
+		$CHECKS{$_} > $filter
+	} keys %CHECKS;
 
-	return ($CHECKS{$check},$check) if $check;
-	return ('','');
+	foreach my $rule ( @rules ) {
+		my $result = $self->$rule() or next;
+
+		# Create the result object
+		return Perl::MinimumVersion::Reason->new(
+			rule    => $rule,
+			version => $CHECKS{$rule},
+			element => _INSTANCE($result, 'PPI::Element'),
+		);
+	}
+
+	# Found nothing of interest
+	return '';
 }
 
 =pod
@@ -389,7 +445,13 @@ C<undef> on error.
 =cut
 
 sub minimum_external_version {
-	my $self = _self(@_) or return undef;
+	my $self   = _SELF(\@_) or return undef;
+	my $reason = $self->minimum_explicit_reason(@_);
+	return $reason ? $reason->version : $reason;
+}
+
+sub minimum_external_reason {
+	my $self = _SELF(\@_) or return undef;
 	unless ( defined $self->{external} ) {
 		$self->{external} = $self->_minimum_external_version;
 	}
@@ -417,7 +479,7 @@ identifiers.
 =cut
 
 sub version_markers {
-	my $self = _self(@_) or return undef;
+	my $self = _SELF(\@_) or return undef;
 
 	my %markers;
 
@@ -443,11 +505,13 @@ sub version_markers {
 
 
 
+
+
 #####################################################################
 # Version Check Methods
 
 sub _perl_5010_pragmas {
-	shift->Document->find_any( sub {
+	shift->Document->find_first( sub {
 		$_[1]->isa('PPI::Statement::Include')
 		and
 		$MATCHES{_perl_5010_pragmas}->{$_[1]->pragma}
@@ -455,7 +519,7 @@ sub _perl_5010_pragmas {
 }
 
 sub _perl_5010_operators {
-	shift->Document->find_any( sub {
+	shift->Document->find_first( sub {
 		$_[1]->isa('PPI::Token::Magic')
 		and
 		$MATCHES{_perl_5010_operators}->{$_[1]->content}
@@ -463,7 +527,7 @@ sub _perl_5010_operators {
 }
 
 sub _perl_5010_magic {
-	shift->Document->find_any( sub {
+	shift->Document->find_first( sub {
 		$_[1]->isa('PPI::Token::Operator')
 		and
 		$MATCHES{_perl_5010_magic}->{$_[1]->content}
@@ -471,13 +535,14 @@ sub _perl_5010_magic {
 }
 
 sub _perl_5008_pragmas {
-	shift->Document->find_any( sub {
+	shift->Document->find_first( sub {
 		$_[1]->isa('PPI::Statement::Include')
 		and
 		$MATCHES{_perl_5008_pragmas}->{$_[1]->pragma}
 	} );
 }
 
+# FIXME: Needs to be upgraded to return something
 sub _bugfix_magic_errno {
 	my $Document = shift->Document;
 	$Document->find_any( sub {
@@ -495,7 +560,7 @@ sub _bugfix_magic_errno {
 
 # version->new(5.005.004);
 sub _unquoted_versions {
-	shift->Document->find_any( sub {
+	shift->Document->find_first( sub {
 		$_[1]->isa('PPI::Token::Number')       or return '';
 		$_[1]->{_subtype}                      or return '';
 		$_[1]->{_subtype} eq 'base256'         or return '';
@@ -517,7 +582,7 @@ sub _unquoted_versions {
 }
 
 sub _pragma_utf8 {
-	shift->Document->find_any( sub {
+	shift->Document->find_first( sub {
 		$_[1]->isa('PPI::Statement::Include')
 		and
 		(
@@ -531,7 +596,7 @@ sub _pragma_utf8 {
 
 # Check for the use of 'use constant { ... }'
 sub _constant_hash {
-	shift->Document->find_any( sub {
+	shift->Document->find_first( sub {
 		$_[1]->isa('PPI::Statement::Include')
 		and
 		$_[1]->type
@@ -545,7 +610,7 @@ sub _constant_hash {
 }
 
 sub _perl_5006_pragmas {
-	shift->Document->find_any( sub {
+	shift->Document->find_first( sub {
 		$_[1]->isa('PPI::Statement::Include')
 		and
 		$MATCHES{_perl_5006_pragmas}->{$_[1]->pragma}
@@ -553,7 +618,7 @@ sub _perl_5006_pragmas {
 }
 
 sub _any_our_variables {
-	shift->Document->find_any( sub {
+	shift->Document->find_first( sub {
 		$_[1]->isa('PPI::Statement::Variable')
 		and
 		$_[1]->type eq 'our'
@@ -561,7 +626,7 @@ sub _any_our_variables {
 }
 
 sub _any_binary_literals {
-	shift->Document->find_any( sub {
+	shift->Document->find_first( sub {
 		$_[1]->isa('PPI::Token::Number')
 		and
 		$_[1]->{_subtype}
@@ -571,14 +636,14 @@ sub _any_binary_literals {
 }
 
 sub _any_version_literals {
-	shift->Document->find_any( sub {
+	shift->Document->find_first( sub {
 		$_[1]->isa('PPI::Token::Number::Version')
 	} );	
 }
 
 
 sub _magic_version {
-	shift->Document->find_any( sub {
+	shift->Document->find_first( sub {
 		$_[1]->isa('PPI::Token::Magic')
 		and
 		$_[1]->content eq '$^V'
@@ -586,11 +651,11 @@ sub _magic_version {
 }
 
 sub _any_attributes {
-	shift->Document->find_any( 'Token::Attribute' );
+	shift->Document->find_first( 'Token::Attribute' );
 }
 
 sub _any_CHECK_blocks {
-	shift->Document->find_any( sub {
+	shift->Document->find_first( sub {
 		$_[1]->isa('PPI::Statement::Scheduled')
 		and
 		$_[1]->type eq 'CHECK'
@@ -598,11 +663,11 @@ sub _any_CHECK_blocks {
 }
 
 sub _any_qr_tokens {
-	shift->Document->find_any( 'Token::QuoteLike::Regexp' );
+	shift->Document->find_first( 'Token::QuoteLike::Regexp' );
 }
 
 sub _perl_5005_pragmas {
-	shift->Document->find_any( sub {
+	shift->Document->find_first( sub {
 		$_[1]->isa('PPI::Statement::Include')
 		and
 		$MATCHES{_perl_5005_pragmas}->{$_[1]->pragma}
@@ -612,7 +677,7 @@ sub _perl_5005_pragmas {
 # A number of modules are highly indicative of using techniques
 # that are themselves version-dependant.
 sub _perl_5005_modules {
-	shift->Document->find_any( sub {
+	shift->Document->find_first( sub {
 		$_[1]->isa('PPI::Statement::Include')
 		and
 		$_[1]->module
@@ -634,7 +699,7 @@ sub _perl_5005_modules {
 }
 
 sub _any_tied_arrays {
-	shift->Document->find_any( sub {
+	shift->Document->find_first( sub {
 		$_[1]->isa('PPI::Statement::Sub')
 		and
 		$_[1]->name eq 'TIEARRAY'
@@ -642,11 +707,11 @@ sub _any_tied_arrays {
 }
 
 sub _any_quotelike_regexp {
-	shift->Document->find_any( 'Token::QuoteLike::Regexp' );
+	shift->Document->find_first( 'Token::QuoteLike::Regexp' );
 }
 
 sub _any_INIT_blocks {
-	shift->Document->find_any( sub {
+	shift->Document->find_first( sub {
 		$_[1]->isa('PPI::Statement::Scheduled')
 		and
 		$_[1]->type eq 'INIT'
@@ -655,7 +720,7 @@ sub _any_INIT_blocks {
 
 # use base 'Exporter' doesn't work reliably everywhere until 5.008
 sub _use_base_exporter {
-	shift->Document->find_any( sub {
+	shift->Document->find_first( sub {
 		$_[1]->isa('PPI::Statement::Include')
 		and
 		$_[1]->module eq 'base'
@@ -668,7 +733,7 @@ sub _use_base_exporter {
 
 # You can't localize a soft reference
 sub _local_soft_reference {
-	shift->Document->find_any( sub {
+	shift->Document->find_first( sub {
 		$_[1]->isa('PPI::Statement::Variable')  or return '';
 		$_[1]->type eq 'local'                  or return '';
 
@@ -695,15 +760,17 @@ sub _local_soft_reference {
 # Carp.pm did not have a $VERSION in 5.6.2
 # Therefore, even "use Carp 0" imposes a 5.8.0 dependency.
 sub _use_carp_version {
-	shift->Document->find_any( sub {
+	shift->Document->find_first( sub {
 		$_[1]->isa('PPI::Statement::Include') or return '';
 		$_[1]->module eq 'Carp'               or return '';
-		return !! length $_[1]->version;
+
+		my $version = $_[1]->module_version;
+		return !! ( defined $version and length "$version" );
 	} );
 }
 
 sub _three_argument_open {
-	shift->Document->find_any( sub {
+	shift->Document->find_first( sub {
 		$_[1]->isa('PPI::Statement')  or return '';
 		my @children=$_[1]->children;
 		#@children >= 7                or return '';
@@ -720,7 +787,7 @@ sub _three_argument_open {
 
 
 sub _substr_4_arg {
-	shift->Document->find_any( sub {
+	shift->Document->find_first( sub {
 		my $main_element=$_[1];
 		$main_element->isa('PPI::Token::Word') or return '';
 		$main_element->content eq 'substr'       or return '';
@@ -738,7 +805,7 @@ sub _substr_4_arg {
 }
 
 sub _mkdir_1_arg {
-	shift->Document->find_any( sub {
+	shift->Document->find_first( sub {
 		my $main_element=$_[1];
 		$main_element->isa('PPI::Token::Word') or return '';
 		$main_element->content eq 'mkdir'       or return '';
@@ -756,7 +823,7 @@ sub _mkdir_1_arg {
 }
 
 sub _splice_negative_length {
-	shift->Document->find_any( sub {
+	shift->Document->find_first( sub {
 		my $main_element=$_[1];
 		$main_element->isa('PPI::Token::Word') or return '';
 		$main_element->content eq 'splice'       or return '';
@@ -787,7 +854,7 @@ sub _splice_negative_length {
 }
 
 sub _postfix_foreach {
-	shift->Document->find_any( sub {
+	shift->Document->find_first( sub {
 		my $main_element=$_[1];
 		$main_element->isa('PPI::Token::Word') or return '';
 		$main_element->content eq 'foreach'       or return '';
@@ -806,7 +873,7 @@ sub _postfix_foreach {
 # weak references require perl 5.6
 # will not work in case of importing several
 sub _weaken {
-	shift->Document->find_any( sub {
+	shift->Document->find_first( sub {
 		(
 			$_[1]->isa('PPI::Statement::Include')
 			and
@@ -830,18 +897,28 @@ sub _weaken {
 }
 
 
+
+
+
 #####################################################################
 # Support Functions
 
 # Let sub be a function, object method, and static method
-sub _self {
-	if ( _INSTANCE($_[0], 'Perl::MinimumVersion') ) {
-		return shift;
+sub _SELF {
+	my $param = shift;
+	if ( _INSTANCE($param->[0], 'Perl::MinimumVersion') ) {
+		return shift @$param;
 	}
-	if ( _CLASS($_[0]) and $_[0]->isa('Perl::MinimumVersion') ) {
-		return shift->new($_[0]);
+	if (
+		_CLASS($param->[0])
+		and
+		$param->[0]->isa('Perl::MinimumVersion')
+	) {
+		my $class   = shift @$param;
+		my $options = shift @$param;
+		return $class->new($options);
 	}
-	Perl::MinimumVersion->new($_[0]);
+	Perl::MinimumVersion->new(shift @$param);
 }
 
 # Find the maximum version, ignoring problems

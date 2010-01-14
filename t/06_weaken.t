@@ -25,9 +25,9 @@ my @examples_yes=(
 plan tests =>(@examples_yes+@examples_not);
 foreach my $example (@examples_not) {
         my $p = Perl::MinimumVersion->new(\$example);
-        is($p->_weaken,'',$example);
+        is( $p->_weaken,'',$example );
 }
 foreach my $example (@examples_yes) {
         my $p = Perl::MinimumVersion->new(\$example);
-        is($p->_weaken,1,$example);
+        ok( $p->_weaken, $example );
 }

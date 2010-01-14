@@ -22,9 +22,9 @@ my @examples_yes=(
 plan tests =>(@examples_yes+@examples_not);
 foreach my $example (@examples_not) {
         my $p = Perl::MinimumVersion->new(\$example);
-        is($p->_postfix_foreach,'',$example);
+        is($p->_postfix_foreach, '', $example);
 }
 foreach my $example (@examples_yes) {
         my $p = Perl::MinimumVersion->new(\$example);
-        is($p->_postfix_foreach,1,$example);
+        is($p->_postfix_foreach, 'foreach', $example);
 }

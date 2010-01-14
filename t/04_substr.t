@@ -28,5 +28,5 @@ foreach my $example (@examples_not) {
 }
 foreach my $example (@examples_yes) {
         my $p = Perl::MinimumVersion->new(\$example);
-        is($p->_substr_4_arg,1,$example);
+        is($p->_substr_4_arg, 'substr', $example);
 }

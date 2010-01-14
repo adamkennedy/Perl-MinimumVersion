@@ -7,7 +7,7 @@ all_from       'lib/Perl/MinimumVersion.pm';
 requires       'version'                => '0.76';
 requires       'List::Util'             => winlike() ? '1.19' : '1.18';
 requires       'Params::Util'           => '0.25';
-requires       'File::Find::Rule'       => '0.30';
+requires       'File::Find::Rule'       => '0.32';
 requires       'File::Find::Rule::Perl' => '1.04';
 requires       'PPI'                    => '1.205';
 requires       'Perl::Critic::Utils'    => '1.104';

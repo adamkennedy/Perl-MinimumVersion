@@ -26,9 +26,11 @@ my @examples_yes=(
 plan tests =>(@examples_not+@examples_yes);
 foreach my $example (@examples_not) {
         my $p = Perl::MinimumVersion->new(\$example);
-        is($p->_splice_negative_length,'',$example) or do {diag "\$\@: $@" if $@};
+        is($p->_splice_negative_length, '', $example)
+	or do { diag "\$\@: $@" if $@ };
 }
 foreach my $example (@examples_yes) {
         my $p = Perl::MinimumVersion->new(\$example);
-        is($p->_splice_negative_length,1,$example) or do {diag "\$\@: $@" if $@};
+        is( $p->_splice_negative_length, 'splice', $example )
+	or do { diag "\$\@: $@" if $@ };
 }

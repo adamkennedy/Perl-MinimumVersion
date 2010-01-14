@@ -1,8 +1,15 @@
 Revision history for Perl extension Perl-MinimumVersion
 
-        - module Errno requires perl 5.5
+1.23_01 Thu 14 Jan 2010
+	- Reworked the internals to capture the version, rule and PPI
+	  element responsible for each limitation as P:MV:Reason (ADAMK)
+	- Added first experimental version of the new _reason API (ADAMK)
+	- Adding 5.8 dependency for "use Carp version ()" (ADAMK)
+        - module Errno requires perl 5.5 (Alexandr Ciornii)
         - PPI is no longer compatible with perl 5.5, so P::MV can also
-          depend on 5.6
+          depend on 5.6 (Alexandr Ciornii)
+	- Bumping File::Find::Rule dependency to 0.32 because we break with
+	  0.31 (ADAMK)
 
 1.22 Wed  25 Nov 2009
         - Negative length in 'splice' requires perl 5.5 (Alexandr Ciornii)
