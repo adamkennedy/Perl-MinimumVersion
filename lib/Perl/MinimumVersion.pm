@@ -44,9 +44,6 @@ use Params::Util ('_INSTANCE', '_CLASS');
 use PPI::Util    ('_Document');
 use PPI          ();
 use Perl::Critic::Utils 1.104 qw{
-	:characters
-	:severities
-	:data_conversion
 	:classification
 	:ppi
 };
