@@ -1,5 +1,9 @@
 Revision history for Perl extension Perl-MinimumVersion
 
+1.24 Fri 22 Jan 2010
+	- The previous changes seem to work well in practice now,
+	  switching to prod release. (ADAMK)
+
 1.23_03 Fri 22 Jan 2010
 	- The --blame output now prints actually shows which file (ADAMK)
 
