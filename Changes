@@ -1,5 +1,8 @@
 Revision history for Perl extension Perl-MinimumVersion
 
+1.23_03 Fri 22 Jan 2010
+	- The --blame output now prints actually shows which file (ADAMK)
+
 1.23_02 Fri 22 Jan 2010
 	- The --blame option now works in the perlver script (ADAMK)
 

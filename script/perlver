@@ -57,7 +57,7 @@ sub dist           ($);
 
 use vars qw{$VERSION $VERBOSE $BLAME $EXPLAIN};
 BEGIN {
-	$VERSION = '1.23_02';
+	$VERSION = '1.23_03';
 
 	# Configuration globals
 	$VERBOSE = '';
@@ -128,8 +128,18 @@ sub summary {
 		my $result  = [ $file, undef, undef ];
 		push @results, $result;
 
+		# Load the document standalone first so we store the file name
+		my $document = PPI::Document::File->new(
+			$file,
+			readonly => 1,
+		);
+		unless ( $document ) {
+			verbose "[error]\n";
+			next;
+		}
+
 		# Create the version checker
-		my $pmv = PMV->new( $file );
+		my $pmv = PMV->new( $document );
 		unless ( $pmv ) {
 			verbose "[error]\n";
 			next;
@@ -245,8 +255,18 @@ sub blame {
 		# Set up the results data
 		verbose sprintf("%-${file_len}s", "Scanning $file...");
 
+		# Load the document standalone first so we store the file name
+		my $document = PPI::Document::File->new(
+			$file,
+			readonly => 1,
+		);
+		unless ( $document ) {
+			verbose "[error]\n";
+			next;
+		}
+
 		# Create the version checker
-		my $pmv = PMV->new( $file );
+		my $pmv = PMV->new( $document );
 		unless ( $pmv ) {
 			verbose "[error]\n";
 			next;
@@ -281,18 +301,19 @@ sub blame {
 	$document->index_locations;
 
 	# Generate the location message
+	my $file    = $document->filename;
 	my $line    = $element->line_number;
 	my $char    = $element->column_number;
 	my $content = $element->content;
 	my $rule    = $max->rule;
 	print " ------------------------------------------------------------\n";
+	print " File : $file\n";
 	print " Line : $line\n";
 	print " Char : $char\n";
 	print " Rule : $rule\n";
 	print " ------------------------------------------------------------\n";
 	print " $content\n";
 	print " ------------------------------------------------------------\n";
-	print "\n";
 }
 
 sub find {
