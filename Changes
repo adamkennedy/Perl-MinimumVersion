@@ -1,5 +1,8 @@
 Revision history for Perl extension Perl-MinimumVersion
 
+1.23_02 Fri 22 Jan 2010
+	- The --blame option now works in the perlver script (ADAMK)
+
 1.23_01 Thu 14 Jan 2010
 	- Reworked the internals to capture the version, rule and PPI
 	  element responsible for each limitation as P:MV:Reason (ADAMK)

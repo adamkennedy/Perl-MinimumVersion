@@ -12,7 +12,7 @@ Perl::MinimumVersion - Find a minimum required version of perl for Perl code
   $object = Perl::MinimumVersion->new( $filename );
   $object = Perl::MinimumVersion->new( \$source  );
   $object = Perl::MinimumVersion->new( $ppi_document );
-
+  
   # Find the minimum version
   $version = $object->minimum_version;
 
@@ -50,9 +50,11 @@ use Perl::Critic::Utils 1.104 qw{
 
 use Perl::MinimumVersion::Reason ();
 
+use constant REASON => 'Perl::MinimumVersion::Reason';
+
 use vars qw{$VERSION @ISA @EXPORT_OK %CHECKS %MATCHES};
 BEGIN {
-	$VERSION = '1.23_01';
+	$VERSION = '1.23_02';
 
 	# Only needed for dev releases, comment out otherwise
 	$VERSION = eval $VERSION;
@@ -921,9 +923,23 @@ sub _SELF {
 # Find the maximum version, ignoring problems
 sub _max {
 	defined $_[0] and "$_[0]" eq PMV and shift;
-	my @valid = grep { _INSTANCE($_, 'version') } @_;
-	my $max   = List::Util::max @valid;
-	$max ? $max : '';
+
+	# Filter and prepare for a Schwartian maximum
+	my @valid = map {
+		[ $_, $_->isa(REASON) ? $_->version : $_ ]
+	} grep {
+		_INSTANCE($_, REASON)
+		or
+		_INSTANCE($_, 'version')
+	} @_ or return '';
+
+	# Find the maximum
+	my $max = shift @valid; 
+	foreach my $it ( @valid ) {
+		$max = $it if $it->[1] > $max->[1];
+	}
+
+	return $max->[0];
 }
 
 1;
