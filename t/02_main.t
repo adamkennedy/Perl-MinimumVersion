@@ -217,7 +217,7 @@ is(
 is(
   Perl::MinimumVersion->minimum_syntax_version($doc, version->new(5.008)),
   '',
-  "also works as object method with limit: no constriants found",
+  "also works as object method with limit: no constraints found",
 );
 }
 
