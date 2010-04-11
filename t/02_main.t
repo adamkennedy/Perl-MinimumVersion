@@ -8,7 +8,7 @@ BEGIN {
 	$^W = 1;
 }
 
-use Test::More tests => 74;
+use Test::More tests => 75;
 use version;
 use File::Spec::Functions ':ALL';
 use PPI;
@@ -208,6 +208,11 @@ is(
   $minver->minimum_syntax_version,
   5.006,
   "5.006 syntax found when no limit supplied",
+);
+is(
+  $minver->minimum_syntax_version(5.005),
+  5.006,
+  "5.006 syntax found when 5.005 limit supplied",
 );
 is(
   $minver->minimum_syntax_version(version->new(5.008)),

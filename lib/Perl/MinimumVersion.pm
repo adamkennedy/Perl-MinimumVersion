@@ -12,7 +12,7 @@ Perl::MinimumVersion - Find a minimum required version of perl for Perl code
   $object = Perl::MinimumVersion->new( $filename );
   $object = Perl::MinimumVersion->new( \$source  );
   $object = Perl::MinimumVersion->new( $ppi_document );
-  
+
   # Find the minimum version
   $version = $object->minimum_version;
 
@@ -375,7 +375,7 @@ sub minimum_syntax_reason {
 		$limit = version->new("$limit");
 	}
 	if ( defined $self->{syntax} ) {
-		if ( $self->{syntax} >= $limit ) {
+		if ( $self->{syntax}->version >= $limit ) {
 			# Previously discovered minimum is what they want
 			return $self->{syntax};
 		}
