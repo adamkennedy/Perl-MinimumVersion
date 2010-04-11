@@ -54,7 +54,7 @@ use constant REASON => 'Perl::MinimumVersion::Reason';
 
 use vars qw{$VERSION @ISA @EXPORT_OK %CHECKS %MATCHES};
 BEGIN {
-	$VERSION = '1.24';
+	$VERSION = '1.25';
 
 	# Only needed for dev releases, comment out otherwise
 	$VERSION = eval $VERSION;
