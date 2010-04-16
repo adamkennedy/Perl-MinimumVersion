@@ -65,7 +65,9 @@ BEGIN {
 
 	# The primary list of version checks
 	%CHECKS = (
+		_yada_yada_yada         => version->new('5.012'),
 		_pkg_name_version       => version->new('5.012'),
+
 		_perl_5010_pragmas      => version->new('5.010'),
 		_perl_5010_operators    => version->new('5.010'),
 		_perl_5010_magic        => version->new('5.010'),
@@ -509,6 +511,13 @@ sub version_markers {
 
 #####################################################################
 # Version Check Methods
+
+sub _yada_yada_yada {
+	shift->Document->find_first( sub {
+		$_[1]->isa('PPI::Token::Operator')
+		and $_[1]->content eq '...'
+	} );
+}
 
 sub _pkg_name_version {
 	shift->Document->find_first( sub {
