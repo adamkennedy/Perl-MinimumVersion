@@ -3,6 +3,7 @@ Revision history for Perl extension Perl-MinimumVersion
 1.25 Sun 11 Apr 2010
 
         - Error in minimum_syntax_reason discovered by perl 5.12 (Alexandr Ciornii)
+	- Detect "package NAME VERSION" in 5.12. (Steffen Mueller)
 
 1.24 Fri 22 Jan 2010
 	- The previous changes seem to work well in practice now,

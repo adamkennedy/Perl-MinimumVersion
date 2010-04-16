@@ -65,6 +65,7 @@ BEGIN {
 
 	# The primary list of version checks
 	%CHECKS = (
+		_pkg_name_version       => version->new('5.012'),
 		_perl_5010_pragmas      => version->new('5.010'),
 		_perl_5010_operators    => version->new('5.010'),
 		_perl_5010_magic        => version->new('5.010'),
@@ -508,6 +509,18 @@ sub version_markers {
 
 #####################################################################
 # Version Check Methods
+
+sub _pkg_name_version {
+	shift->Document->find_first( sub {
+		$_[1]->isa('PPI::Statement::Package') or return '';
+		my @child = $_[1]->schildren();
+		$child[0]->isa('PPI::Token::Word')    or return '';
+		$child[0]->content eq 'package'       or return '';
+		$child[1]->isa('PPI::Token::Word')    or return '';
+		$child[2]->isa('PPI::Token::Number')  or return '';
+		return 1;
+	} );
+}
 
 sub _perl_5010_pragmas {
 	shift->Document->find_first( sub {
@@ -969,6 +982,9 @@ B<Write lots more version checkers>
 B<Write the explicit version checker>
 
 B<Write the recursive module descend stuff>
+
+B<Check for more 5.12 features (currently only detecting
+C<package NAME VERSION;>)>
 
 =head1 SUPPORT
 
