@@ -28,11 +28,11 @@ plan tests =>(@examples_not+@examples_yes);
 foreach my $example (@examples_not) {
 	my $p = Perl::MinimumVersion->new(\$example);
 	is( $p->_pkg_name_version, '', $example )
-	or do { diag "\$\@: $@" if $@ };
+	  or do { diag "\$\@: $@" if $@ };
 }
 foreach my $example (@examples_yes) {
 	my $p = Perl::MinimumVersion->new(\$example);
 	ok( $p->_pkg_name_version, $example )
-	or do { diag "\$\@: $@" if $@ };
+	  or do { diag "\$\@: $@" if $@ };
 }
 

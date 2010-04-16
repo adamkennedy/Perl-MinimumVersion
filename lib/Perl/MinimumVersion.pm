@@ -65,6 +65,7 @@ BEGIN {
 
 	# The primary list of version checks
 	%CHECKS = (
+		_feature_bundle_5_12    => version->new('5.012'),
 		_yada_yada_yada         => version->new('5.012'),
 		_pkg_name_version       => version->new('5.012'),
 
@@ -508,7 +509,6 @@ sub version_markers {
 
 
 
-
 #####################################################################
 # Version Check Methods
 
@@ -516,6 +516,19 @@ sub _yada_yada_yada {
 	shift->Document->find_first( sub {
 		$_[1]->isa('PPI::Token::Operator')
 		and $_[1]->content eq '...'
+	} );
+}
+
+sub _feature_bundle_5_12 {
+	shift->Document->find_first( sub {
+		$_[1]->isa('PPI::Statement::Include') or return '';
+		$_[1]->pragma eq 'feature'            or return '';
+		my @child = $_[1]->schildren;
+		my @args = @child[1..$#child]; # skip 'use', 'feature' and ';'
+		foreach my $arg (@args) {
+			return $arg->content if $arg->content =~ /:5\.12/;
+		}
+		return '';
 	} );
 }
 
@@ -993,7 +1006,7 @@ B<Write the explicit version checker>
 B<Write the recursive module descend stuff>
 
 B<Check for more 5.12 features (currently only detecting
-C<package NAME VERSION;>)>
+C<package NAME VERSION;>, C<...>, and C<use feature ':5.12'>)>
 
 =head1 SUPPORT
 

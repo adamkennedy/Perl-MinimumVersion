@@ -11,24 +11,26 @@ use Test::More;
 #use version;
 use Perl::MinimumVersion;
 my @examples_not=(
-    q{'foo'.'foo'}, # okay, okay, adding close examples is a TODO
-    q{sub foo {}},
+    q{use feature ':5.8'},
+    q{use feature ':5.10'},
+    q{use feature},
+    q{use feature 'say', ':5.10';},
 );
 my @examples_yes=(
-    q{...},
-    q{...;},
-    q{if(1){...}},
-    q{sub foo {...}},
+    q{use feature ':5.8', ':5.12'},
+    q{use feature ':5.12'},
+    q{use feature ':5.12', "say"},
+    q{use feature ':5.12';},
 );
 plan tests =>(@examples_not+@examples_yes);
 foreach my $example (@examples_not) {
 	my $p = Perl::MinimumVersion->new(\$example);
-	is( $p->_yada_yada_yada, '', $example )
+	is( $p->_feature_bundle_5_12, '', $example )
 	  or do { diag "\$\@: $@" if $@ };
 }
 foreach my $example (@examples_yes) {
 	my $p = Perl::MinimumVersion->new(\$example);
-	ok( $p->_yada_yada_yada, $example )
+	ok( $p->_feature_bundle_5_12, $example )
 	  or do { diag "\$\@: $@" if $@ };
 }
 
