@@ -10,7 +10,7 @@ use warnings;
 
 use vars qw{$VERSION};
 BEGIN {
-	$VERSION = '1.25';
+	$VERSION = '1.25_01';
 
 	# Only needed for dev releases, comment out otherwise
 	$VERSION = eval $VERSION;
