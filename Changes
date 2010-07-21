@@ -1,5 +1,6 @@
 Revision history for Perl extension Perl-MinimumVersion
 
+1.26 Thu 22 Jul 2010
 	- Detect "package NAME VERSION" in 5.12. (Steffen Mueller)
 	- Detect "..." (yada yada yada) in 5.12. (Steffen Mueller)
 	- Detect "use feature ':5.12';" in 5.12. (Steffen Mueller)
