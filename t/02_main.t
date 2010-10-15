@@ -8,7 +8,7 @@ BEGIN {
 	$^W = 1;
 }
 
-use Test::More tests => 75;
+use Test::More tests => 78;
 use version;
 use File::Spec::Functions ':ALL';
 use PPI;
@@ -154,6 +154,14 @@ END_PERL
 SCOPE: {
 my $v = version_is( <<'END_PERL', '5.008', 'utf8 module makes the version 5.008' );
 use utf8;
+1;
+END_PERL
+}
+
+# Regression: binary
+SCOPE: {
+my $v = version_is( <<'END_PERL', '5.006', 'binary' );
+$c=0b10000001;
 1;
 END_PERL
 }

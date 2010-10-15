@@ -661,11 +661,7 @@ sub _any_our_variables {
 
 sub _any_binary_literals {
 	shift->Document->find_first( sub {
-		$_[1]->isa('PPI::Token::Number')
-		and
-		$_[1]->{_subtype}
-		and
-		$_[1]->{_subtype} eq 'binary'
+		$_[1]->isa('PPI::Token::Number::Binary')
 	} );	
 }
 
