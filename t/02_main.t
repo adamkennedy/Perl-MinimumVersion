@@ -208,6 +208,16 @@ END_PERL
 ok( $v->_local_soft_reference, '->_local_soft_reference returns true' );
 }
 
+# Check variables added in 5.5
+SCOPE: {
+my $v = version_is( <<'END_PERL', '5.005', 'variables added in 5.5' );
+$! + $^R;
+END_PERL
+ok( $v->_5005_variables, '->_5005_variables returns true' );
+}
+
+
+
 # Check that minimum_syntax_version's limit param is respected
 SCOPE: {
 my $doc = PPI::Document->new(\'our $x'); # requires 5.006 syntax

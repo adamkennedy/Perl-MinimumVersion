@@ -104,6 +104,7 @@ BEGIN {
 		_any_INIT_blocks        => version->new('5.005'),
 		_substr_4_arg           => version->new('5.005'),
 		_splice_negative_length => version->new('5.005'),
+		_5005_variables         => version->new('5.005'),
 
 		_postfix_foreach        => version->new('5.004.05'),
 	);
@@ -926,6 +927,14 @@ sub _weaken {
 	} );
 }
 
+
+sub _5005_variables {
+	shift->Document->find_first( sub {
+		$_[1]->isa('PPI::Token::Magic')
+		and
+		($_[1]->content eq '$!' or $_[1]->content eq '$^R')
+	} );
+}
 
 
 
