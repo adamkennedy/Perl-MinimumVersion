@@ -12,14 +12,15 @@ use Test::More;
 use Perl::MinimumVersion;
 my @examples_not=(
     q{'foo'.'foo'}, # okay, okay, adding close examples is a TODO
-    q{sub foo {}},
+    q/sub foo {}/,
     q{1 ... 3}, #sed version of flip-flop
 );
 my @examples_yes=(
     q{...},
+    q{ ... },
     q{...;},
-    q{if(1){...}},
-    q{sub foo {...}},
+    q/if(1){...}/,
+    q/sub foo {...}/,
 );
 plan tests =>(@examples_not+@examples_yes);
 foreach my $example (@examples_not) {

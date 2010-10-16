@@ -516,7 +516,12 @@ sub version_markers {
 sub _yada_yada_yada {
 	shift->Document->find_first( sub {
 		$_[1]->isa('PPI::Token::Operator')
-		and $_[1]->content eq '...'
+		and $_[1]->content eq '...'  or return '';
+		my @child = $_[1]->parent->schildren;
+		@child == 1 and return 1;
+		if (@child == 2) {
+			$child[1]->isa('PPI::Token::Structure')
+		}
 	} );
 }
 

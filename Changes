@@ -2,6 +2,7 @@ Revision history for Perl extension Perl-MinimumVersion
 
         - Fix detection of binary numbers (Alexandr Ciornii)
         - Add check for variables added in 5.5 (Alexandr Ciornii)
+        - Correct detection of different cases of '...' (Alexandr Ciornii)
 
 1.26 Thu 22 Jul 2010
 	- Detect "package NAME VERSION" in 5.12. (Steffen Mueller)
