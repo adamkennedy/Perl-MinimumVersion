@@ -8,7 +8,7 @@ BEGIN {
 	$^W = 1;
 }
 
-use Test::More tests => 78;
+use Test::More tests => 82;
 use version;
 use File::Spec::Functions ':ALL';
 use PPI;
@@ -189,7 +189,7 @@ SCOPE: {
 my $v = version_is( <<'END_PERL', '5.010', '"use mro" matches expected version' );
 use mro 'c3';
 END_PERL
-ok( $v->_perl_5010_pragmas, '->_any_our_variables returns true' );
+ok( $v->_perl_5010_pragmas, '->_perl_5010_pragmas returns true' );
 }
 
 # Check "version number"
