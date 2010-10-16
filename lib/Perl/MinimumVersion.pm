@@ -941,6 +941,14 @@ sub _5005_variables {
 	} );
 }
 
+#added in 5.5
+sub _bareword_ends_with_double_colon {
+	shift->Document->find_first( sub {
+		$_[1]->isa('PPI::Token::Word')
+		and
+		$_[1]->content =~ /::$/
+	} );
+}
 
 
 
