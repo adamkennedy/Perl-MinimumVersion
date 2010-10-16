@@ -13,6 +13,7 @@ use Perl::MinimumVersion;
 my @examples_not=(
     q{'foo'.'foo'}, # okay, okay, adding close examples is a TODO
     q{sub foo {}},
+    q{1 ... 3}, #sed version of flip-flop
 );
 my @examples_yes=(
     q{...},
