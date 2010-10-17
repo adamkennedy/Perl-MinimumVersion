@@ -105,6 +105,7 @@ BEGIN {
 		_substr_4_arg           => version->new('5.005'),
 		_splice_negative_length => version->new('5.005'),
 		_5005_variables         => version->new('5.005'),
+		_bareword_ends_with_double_colon => version->new('5.005'),
 
 		_postfix_foreach        => version->new('5.004.05'),
 	);
