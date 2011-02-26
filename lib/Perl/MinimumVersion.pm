@@ -54,7 +54,7 @@ use constant REASON => 'Perl::MinimumVersion::Reason';
 
 use vars qw{$VERSION @ISA @EXPORT_OK %CHECKS %MATCHES};
 BEGIN {
-	$VERSION = '1.26';
+	$VERSION = '1.27';
 
 	# Only needed for dev releases, comment out otherwise
 	$VERSION = eval $VERSION;
@@ -808,10 +808,10 @@ sub _use_carp_version {
 
 sub _three_argument_open {
 	shift->Document->find_first( sub {
-		$_[1]->isa('PPI::Statement')  or return '';
-		my @children=$_[1]->children;
+		$_[1]->isa('PPI::Statement') or return '';
+		my @children = $_[1]->children;
 		#@children >= 7                or return '';
-		my $main_element=$children[0];
+		my $main_element = $children[0];
 		$main_element->isa('PPI::Token::Word') or return '';
 		$main_element->content eq 'open'       or return '';
 		my @arguments = parse_arg_list($main_element);
@@ -821,7 +821,6 @@ sub _three_argument_open {
 		return '';
 	} );
 }
-
 
 sub _substr_4_arg {
 	shift->Document->find_first( sub {
@@ -1045,7 +1044,7 @@ L<http://ali.as/>, L<PPI>, L<version>
 
 =head1 COPYRIGHT
 
-Copyright 2005 - 2010 Adam Kennedy.
+Copyright 2005 - 2011 Adam Kennedy.
 
 This program is free software; you can redistribute
 it and/or modify it under the same terms as Perl itself.

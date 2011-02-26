@@ -1,5 +1,8 @@
 Revision history for Perl extension Perl-MinimumVersion
 
+1.27 Sat 26 Feb 2011
+	- Updating to Module::Install::DSL 1.00
+	- Updating copyright year
         - Fix detection of binary numbers (Alexandr Ciornii)
         - Add check for variables added in 5.5 (Alexandr Ciornii)
         - Correct detection of different cases of '...' (Alexandr Ciornii)
