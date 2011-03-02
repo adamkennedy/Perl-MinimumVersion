@@ -12,7 +12,7 @@ Perl::MinimumVersion - Find a minimum required version of perl for Perl code
   $object = Perl::MinimumVersion->new( $filename );
   $object = Perl::MinimumVersion->new( \$source  );
   $object = Perl::MinimumVersion->new( $ppi_document );
-
+  
   # Find the minimum version
   $version = $object->minimum_version;
 
@@ -50,14 +50,12 @@ use Perl::Critic::Utils 1.104 qw{
 
 use Perl::MinimumVersion::Reason ();
 
-use constant REASON => 'Perl::MinimumVersion::Reason';
-
 use vars qw{$VERSION @ISA @EXPORT_OK %CHECKS %MATCHES};
 BEGIN {
-	$VERSION = '1.27';
+	$VERSION = '1.28';
 
 	# Only needed for dev releases, comment out otherwise
-	$VERSION = eval $VERSION;
+	# $VERSION = eval $VERSION;
 
 	# Export the PMV convenience constant
 	@ISA       = 'Exporter';
@@ -561,7 +559,7 @@ sub _perl_5010_pragmas {
 
 sub _perl_5010_operators {
 	shift->Document->find_first( sub {
-		$_[1]->isa('PPI::Token::Magic')
+		$_[1]->isa('PPI::Token::Operator')
 		and
 		$MATCHES{_perl_5010_operators}->{$_[1]->content}
 	} );
@@ -569,9 +567,9 @@ sub _perl_5010_operators {
 
 sub _perl_5010_magic {
 	shift->Document->find_first( sub {
-		$_[1]->isa('PPI::Token::Operator')
+		$_[1]->isa('PPI::Token::Magic')
 		and
-		$MATCHES{_perl_5010_magic}->{$_[1]->content}
+		$MATCHES{_perl_5010_magic}->{$_[1]->symbol}
 	} );
 }
 
@@ -589,13 +587,13 @@ sub _bugfix_magic_errno {
 	$Document->find_any( sub {
 		$_[1]->isa('PPI::Token::Magic')
 		and
-		$_[1]->content eq '$^E'
+		$_[1]->symbol eq '$^E'
 	} )
 	and
 	$Document->find_any( sub {
 		$_[1]->isa('PPI::Token::Magic')
 		and
-		$_[1]->content eq '$!'
+		$_[1]->symbol eq '$!'
 	} );
 }
 
@@ -669,13 +667,13 @@ sub _any_our_variables {
 sub _any_binary_literals {
 	shift->Document->find_first( sub {
 		$_[1]->isa('PPI::Token::Number::Binary')
-	} );	
+	} );
 }
 
 sub _any_version_literals {
 	shift->Document->find_first( sub {
 		$_[1]->isa('PPI::Token::Number::Version')
-	} );	
+	} );
 }
 
 
@@ -683,7 +681,7 @@ sub _magic_version {
 	shift->Document->find_first( sub {
 		$_[1]->isa('PPI::Token::Magic')
 		and
-		$_[1]->content eq '$^V'
+		$_[1]->symbol eq '$^V'
 	} );
 }
 
@@ -826,7 +824,7 @@ sub _substr_4_arg {
 	shift->Document->find_first( sub {
 		my $main_element=$_[1];
 		$main_element->isa('PPI::Token::Word') or return '';
-		$main_element->content eq 'substr'       or return '';
+		$main_element->content eq 'substr'     or return '';
 		return '' if is_hash_key($main_element);
 		return '' if is_method_call($main_element);
 		return '' if is_subroutine_name($main_element);
@@ -862,7 +860,7 @@ sub _splice_negative_length {
 	shift->Document->find_first( sub {
 		my $main_element=$_[1];
 		$main_element->isa('PPI::Token::Word') or return '';
-		$main_element->content eq 'splice'       or return '';
+		$main_element->content eq 'splice'     or return '';
 		return '' if is_hash_key($main_element);
 		return '' if is_method_call($main_element);
 		return '' if is_subroutine_name($main_element);
@@ -893,7 +891,7 @@ sub _postfix_foreach {
 	shift->Document->find_first( sub {
 		my $main_element=$_[1];
 		$main_element->isa('PPI::Token::Word') or return '';
-		$main_element->content eq 'foreach'       or return '';
+		$main_element->content eq 'foreach'    or return '';
 		return '' if is_hash_key($main_element);
 		return '' if is_method_call($main_element);
 		return '' if is_subroutine_name($main_element);
@@ -932,12 +930,11 @@ sub _weaken {
 	} );
 }
 
-
 sub _5005_variables {
 	shift->Document->find_first( sub {
 		$_[1]->isa('PPI::Token::Magic')
 		and
-		($_[1]->content eq '$!' or $_[1]->content eq '$^R')
+		($_[1]->symbol eq '$!' or $_[1]->symbol eq '$^R')
 	} );
 }
 
@@ -979,15 +976,15 @@ sub _max {
 
 	# Filter and prepare for a Schwartian maximum
 	my @valid = map {
-		[ $_, $_->isa(REASON) ? $_->version : $_ ]
+		[ $_, $_->isa('Perl::MinimumVersion::Reason') ? $_->version : $_ ]
 	} grep {
-		_INSTANCE($_, REASON)
+		_INSTANCE($_, 'Perl::MinimumVersion::Reason')
 		or
 		_INSTANCE($_, 'version')
 	} @_ or return '';
 
 	# Find the maximum
-	my $max = shift @valid; 
+	my $max = shift @valid;
 	foreach my $it ( @valid ) {
 		$max = $it if $it->[1] > $max->[1];
 	}
