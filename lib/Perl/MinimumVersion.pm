@@ -325,7 +325,7 @@ sub _minimum_explicit_version {
 	my $element = undef;
 	foreach my $include ( @$explicit ) {
 		my $version = version->new($include->version);
-		if ( $version > $max or not $element ) {
+		if ( not $element or $version > $max ) {
 			$max     = $version;
 			$element = $include;
 		}

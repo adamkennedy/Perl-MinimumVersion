@@ -1,5 +1,8 @@
 Revision history for Perl extension Perl-MinimumVersion
 
+1.xx whenever
+	- "Use of uninitialized value in null operation" fix.
+
 1.28 Wed  2 Mar 2011
 	- The ->isa in the 5.10 operator and magic variable tests were
 	  back the front, breaking both. Fixed (ADAMK)
