@@ -1,7 +1,8 @@
 Revision history for Perl extension Perl-MinimumVersion
 
-1.xx whenever
+1.29 to be released
 	- "Use of uninitialized value in null operation" fix.
+	- Adding test for "utf8::is_utf" 5.8.1 special case
 
 1.28 Wed  2 Mar 2011
 	- The ->isa in the 5.10 operator and magic variable tests were

@@ -52,7 +52,7 @@ use Perl::MinimumVersion::Reason ();
 
 use vars qw{$VERSION @ISA @EXPORT_OK %CHECKS %MATCHES};
 BEGIN {
-	$VERSION = '1.28';
+	$VERSION = '1.29';
 
 	# Only needed for dev releases, comment out otherwise
 	# $VERSION = eval $VERSION;
@@ -73,6 +73,7 @@ BEGIN {
 
 		# Various small things
 		_bugfix_magic_errno     => version->new('5.008.003'),
+		_is_utf8                => version->new('5.008.001'),
 		_unquoted_versions      => version->new('5.008.001'),
 		_perl_5008_pragmas      => version->new('5.008'),
 		_constant_hash          => version->new('5.008'),
@@ -103,7 +104,7 @@ BEGIN {
 		_substr_4_arg           => version->new('5.005'),
 		_splice_negative_length => version->new('5.005'),
 		_5005_variables         => version->new('5.005'),
-		_bareword_ends_with_double_colon => version->new('5.005'),
+		_bareword_double_colon  => version->new('5.005'),
 
 		_postfix_foreach        => version->new('5.004.05'),
 	);
@@ -597,6 +598,15 @@ sub _bugfix_magic_errno {
 	} );
 }
 
+# utf8::is_utf requires 5.8.1 unlike the rest of utf8
+sub _is_utf {
+	shift->Document->find_first( sub {
+		$_[1]->isa('PPI::Token::Word') or return '';
+		$_[1] eq 'utf8::is_utf'        or return '';
+		return 1;
+	} );
+}
+
 # version->new(5.005.004);
 sub _unquoted_versions {
 	shift->Document->find_first( sub {
@@ -939,7 +949,7 @@ sub _5005_variables {
 }
 
 #added in 5.5
-sub _bareword_ends_with_double_colon {
+sub _bareword_double_colon {
 	shift->Document->find_first( sub {
 		$_[1]->isa('PPI::Token::Word')
 		and
