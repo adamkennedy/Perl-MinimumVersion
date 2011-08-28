@@ -14,6 +14,7 @@ my @examples_not=(
     q{'foo'.'foo'}, # okay, okay, adding close examples is a TODO
     q/sub foo {}/,
     q{1 ... 3}, #sed version of flip-flop
+    q[grep { /^$newver(?:\s+|$)/ ... /^\S/ }], #RT#59774
 );
 my @examples_yes=(
     q{...},
