@@ -34,6 +34,8 @@ perlver - The Perl Minimum Version Analyzer
 C<perlver> is a console script created to provide convenient access to the
 functionality provided by L<Perl::MinimumVersion>.
 
+--blame option shows code which requires this version of perl
+
 The synopsis above pretty much covers all you need to know at this point.
 
 =cut
