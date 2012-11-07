@@ -34,12 +34,13 @@ covers it.
 
 =cut
 
-use 5.006;
+#use 5.006;
 use strict;
+#use warnings;
 use version      ();
 use Carp         ();
 use Exporter     ();
-use List::Util   ();
+use List::Util   qw(max);
 use Params::Util ('_INSTANCE', '_CLASS');
 use PPI::Util    ('_Document');
 use PPI          ();
@@ -50,7 +51,7 @@ use Perl::Critic::Utils 1.104 qw{
 
 use Perl::MinimumVersion::Reason ();
 
-use vars qw{$VERSION @ISA @EXPORT_OK %CHECKS %MATCHES};
+our ($VERSION, @ISA, @EXPORT_OK, %CHECKS, @CHECKS_RV ,%MATCHES);
 BEGIN {
 	$VERSION = '1.29';
 
@@ -63,7 +64,7 @@ BEGIN {
 
 	# The primary list of version checks
 	%CHECKS = (
-		_feature_bundle_5_12    => version->new('5.012'),
+		#_feature_bundle_5_12    => version->new('5.012'),
 		_yada_yada_yada         => version->new('5.012'),
 		_pkg_name_version       => version->new('5.012'),
 
@@ -107,6 +108,9 @@ BEGIN {
 		_bareword_double_colon  => version->new('5.005'),
 
 		_postfix_foreach        => version->new('5.004.05'),
+	);
+	@CHECKS_RV = ( #subs that return version
+	    '_feature_bundle',
 	);
 
 	# Predefine some indexes needed by various check methods
@@ -273,7 +277,7 @@ sub minimum_reason {
 }
 
 sub default_reason {
-	Perl::MinimumVersion->new(
+	Perl::MinimumVersion::Reason->new(
 		rule    => 'default',
 		version => $_[0]->{default},
 		element => undef,
@@ -408,6 +412,22 @@ sub _minimum_syntax_version {
 	my $self   = shift;
 	my $filter = shift || $self->{default};
 
+	my %rv_result;
+	my $current_reason;
+	foreach my $rule ( @CHECKS_RV ) {
+		my ($v, $obj) = $self->$rule();
+		$v = version->new($v);
+		if ( $v > $filter ) {
+			$filter = $v;
+			$current_reason = Perl::MinimumVersion::Reason->new(
+				rule    => $rule,
+				version => $v,
+				element => _INSTANCE($obj, 'PPI::Element'),
+			);
+	    }
+	}
+
+
 	# Always check in descending version order.
 	# By doing it this way, the version of the first check that matches
 	# is also the version of the document as a whole.
@@ -429,7 +449,7 @@ sub _minimum_syntax_version {
 	}
 
 	# Found nothing of interest
-	return '';
+	return $current_reason || '';
 }
 
 =pod
@@ -525,17 +545,23 @@ sub _yada_yada_yada {
 	} );
 }
 
-sub _feature_bundle_5_12 {
-	shift->Document->find_first( sub {
+sub _feature_bundle {
+    my @versions;
+    my ($version, $obj);
+	shift->Document->find( sub {
 		$_[1]->isa('PPI::Statement::Include') or return '';
 		$_[1]->pragma eq 'feature'            or return '';
 		my @child = $_[1]->schildren;
 		my @args = @child[1..$#child]; # skip 'use', 'feature' and ';'
 		foreach my $arg (@args) {
-			return $arg->content if $arg->content =~ /:5\.12/;
+			if ($arg->content =~ /:(5\.\d+)(?:\.\d+)?/ and $1 > ($version || 0) ) {
+				$version = $1;
+				$obj = $_[1];
+			}
 		}
 		return '';
 	} );
+	return (defined($version)?"$version.0":undef, $obj);
 }
 
 sub _pkg_name_version {
@@ -599,7 +625,7 @@ sub _bugfix_magic_errno {
 }
 
 # utf8::is_utf requires 5.8.1 unlike the rest of utf8
-sub _is_utf {
+sub _is_utf8 {
 	shift->Document->find_first( sub {
 		$_[1]->isa('PPI::Token::Word') or return '';
 		$_[1] eq 'utf8::is_utf'        or return '';

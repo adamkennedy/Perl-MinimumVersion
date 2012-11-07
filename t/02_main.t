@@ -8,7 +8,7 @@ BEGIN {
 	$^W = 1;
 }
 
-use Test::More tests => 82;
+use Test::More tests => 91;
 use version;
 use File::Spec::Functions ':ALL';
 use PPI;
@@ -251,6 +251,27 @@ use base 'Exporter';
 1;
 END_PERL
 }
+
+
+# Check feature bundle
+SCOPE: {
+my $v = version_is( <<'END_PERL', '5.12.0', 'use feature :5.12 matches expected version' );
+use feature ':5.12';
+END_PERL
+}
+SCOPE: {
+my $v = version_is( <<'END_PERL', '5.10.0', 'use feature :5.10 along with older feature' );
+use feature ':5.10';open A,'<','test.txt';
+END_PERL
+}
+SCOPE: {
+my $v = version_is( <<'END_PERL', '5.12.0', 'use feature :5.10 along with newer feature' );
+use feature ':5.10';
+sub foo { ... };
+END_PERL
+}
+
+
 
 # test version_markers
 SCOPE: {
