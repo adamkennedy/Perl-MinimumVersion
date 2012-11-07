@@ -23,12 +23,12 @@ my @examples_yes=(
 plan tests =>(@examples_not+@examples_yes);
 foreach my $example (@examples_not) {
 	my $p = Perl::MinimumVersion->new(\$example);
-	is( $p->_bareword_ends_with_double_colon, '', $example )
+	is( $p->_bareword_double_colon, '', $example )
 	  or do { diag "\$\@: $@" if $@ };
 }
 foreach my $example (@examples_yes) {
 	my $p = Perl::MinimumVersion->new(\$example);
-	ok( $p->_bareword_ends_with_double_colon, "$example - detected")
+	ok( $p->_bareword_double_colon, "$example - detected")
 	  or do { diag "\$\@: $@" if $@ };
 }
 
