@@ -48,7 +48,7 @@ use Perl::Critic::Utils 1.104 qw{
 	:classification
 	:ppi
 };
-
+use PPIx::Regexp;
 use Perl::MinimumVersion::Reason ();
 
 our ($VERSION, @ISA, @EXPORT_OK, %CHECKS, @CHECKS_RV ,%MATCHES);
@@ -110,7 +110,7 @@ BEGIN {
 		_postfix_foreach        => version->new('5.004.05'),
 	);
 	@CHECKS_RV = ( #subs that return version
-	    '_feature_bundle',
+	    '_feature_bundle','_regex',
 	);
 
 	# Predefine some indexes needed by various check methods
@@ -562,6 +562,25 @@ sub _feature_bundle {
 		return '';
 	} );
 	return (defined($version)?"$version.0":undef, $obj);
+}
+
+sub _regex {
+    my @versions;
+    my ($version, $obj);
+	shift->Document->find( sub {
+	    return '' unless
+			grep { $_[1]->isa($_) }
+			qw/PPI::Token::QuoteLike::Regexp PPI::Token::Regexp::Match PPI::Token::Regexp::Substitute/;
+			my $re = PPIx::Regexp->new( $_[1] );
+        	my $v = $re->perl_version_introduced;
+			if ($v and $v > ($version || 0) ) {
+				$version = $v;
+				$obj = $_[1];
+			}
+		return '';
+	} );
+	$version = undef if $version eq '5.000';
+	return ($version, $obj);
 }
 
 sub _pkg_name_version {

@@ -8,7 +8,7 @@ BEGIN {
 	$^W = 1;
 }
 
-use Test::More tests => 91;
+use Test::More tests => 109;
 use version;
 use File::Spec::Functions ':ALL';
 use PPI;
@@ -268,6 +268,40 @@ SCOPE: {
 my $v = version_is( <<'END_PERL', '5.12.0', 'use feature :5.10 along with newer feature' );
 use feature ':5.10';
 sub foo { ... };
+END_PERL
+}
+
+# Check regexes
+SCOPE: {
+my $v = version_is( <<'END_PERL', '5.005', '\z in regex matches expected version' );
+m/a\z/
+END_PERL
+}
+SCOPE: {
+my $v = version_is( <<'END_PERL', '5.006.0', '\z along with newer feature' );
+m/a\z/;open A,'<','test.txt';
+END_PERL
+}
+SCOPE: {
+my $v = version_is( <<'END_PERL', '5.015008', '\F' );
+s/\Fa//;
+END_PERL
+}
+SCOPE: {
+my $v = version_is( <<'END_PERL', '5.004', '/c regex modifier' );
+s//c;
+END_PERL
+}
+SCOPE: {
+my $v = version_is( <<'END_PERL', '5.015008', '\F and use feature' );
+use feature ':5.10';
+s/\Fa//;
+END_PERL
+}
+SCOPE: {
+my $v = version_is( <<'END_PERL', '5.16.0', '\F and use feature' );
+use feature ':5.16';
+s/\Fa//;
 END_PERL
 }
 
