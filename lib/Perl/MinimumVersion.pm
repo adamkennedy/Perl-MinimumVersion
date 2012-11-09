@@ -64,7 +64,6 @@ BEGIN {
 
 	# The primary list of version checks
 	%CHECKS = (
-		#_feature_bundle_5_12    => version->new('5.012'),
 		_yada_yada_yada         => version->new('5.012'),
 		_pkg_name_version       => version->new('5.012'),
 
@@ -533,18 +532,7 @@ sub version_markers {
 #####################################################################
 # Version Check Methods
 
-sub _yada_yada_yada {
-	shift->Document->find_first( sub {
-		$_[1]->isa('PPI::Token::Operator')
-		and $_[1]->content eq '...'  or return '';
-		my @child = $_[1]->parent->schildren;
-		@child == 1 and return 1;
-		if (@child == 2) {
-			$child[1]->isa('PPI::Token::Structure')
-		}
-	} );
-}
-
+#:5.14 means same as :5.12, but :5.14 is not defined in feature.pm in perl 5.12.
 sub _feature_bundle {
     my @versions;
     my ($version, $obj);
@@ -554,8 +542,12 @@ sub _feature_bundle {
 		my @child = $_[1]->schildren;
 		my @args = @child[1..$#child]; # skip 'use', 'feature' and ';'
 		foreach my $arg (@args) {
-			if ($arg->content =~ /:(5\.\d+)(?:\.\d+)?/ and $1 > ($version || 0) ) {
-				$version = $1;
+		    my $v = 0;
+		    $v = $1 if ($arg->content =~ /:(5\.\d+)(?:\.\d+)?/);
+		    $v = max($1,5.16) if ($arg->content =~ /\barray_base\b/); #defined only in 5.16
+			#
+			if ($v and $v > ($version || 0) ) {
+				$version = $v;
 				$obj = $_[1];
 			}
 		}
@@ -581,6 +573,18 @@ sub _regex {
 	} );
 	$version = undef if $version eq '5.000';
 	return ($version, $obj);
+}
+
+sub _yada_yada_yada {
+	shift->Document->find_first( sub {
+		$_[1]->isa('PPI::Token::Operator')
+		and $_[1]->content eq '...'  or return '';
+		my @child = $_[1]->parent->schildren;
+		@child == 1 and return 1;
+		if (@child == 2) {
+			$child[1]->isa('PPI::Token::Structure')
+		}
+	} );
 }
 
 sub _pkg_name_version {

@@ -13,6 +13,7 @@ my %examples=(
     q{use feature 'say', ':5.10';} => '5.10.0',
     q{use feature ':5.10';use feature ':5.12';} => '5.12.0',
     q{use feature ':5.14';use feature ':5.12';} => '5.14.0',
+    q{use feature 'array_base';} => '5.16.0',
 );
 plan tests => scalar(keys %examples);
 foreach my $example (sort keys %examples) {
