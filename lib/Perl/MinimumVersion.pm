@@ -580,6 +580,7 @@ sub _each_argument {
 	shift->Document->find( sub {
 		$_[1]->isa('PPI::Token::Word') or return '';
 		$_[1]->content =~ '^(each|keys|values)$'  or return '';
+		return '' if is_method_call($_[1]);
 		my $next = $_[1]->snext_sibling;
 		$next = $next->schild(0)->schild(0) if $next->isa('PPI::Structure::List');
 		if($next->isa('PPI::Token::Cast')) {
@@ -594,7 +595,7 @@ sub _each_argument {
 			if($next->raw_type eq '@' && 5.012 > ($version || 0)) {
 				$version = 5.012;
 				$obj = $_[1]->parent;
-			} elsif($next->raw_type eq '$' && 5.104 > ($version || 0)) {
+			} elsif($next->raw_type eq '$' && 5.014 > ($version || 0)) {
 				$version = 5.014;
 				$obj = $_[1]->parent;
 			}
@@ -604,6 +605,8 @@ sub _each_argument {
 				$obj = $_[1]->parent;
 			}
 		}
+		return 1 if $version == 5.014;
+		return '';
 	} );
 	return (defined($version)?"$version":undef, $obj);
 }

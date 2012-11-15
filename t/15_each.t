@@ -8,9 +8,13 @@ use Test::More;
 #use version;
 use Perl::MinimumVersion;
 my %examples=(
+    q/$HASH{each}/      => undef,
+    q{$obj->each(@foo)} => undef,
     q{each %foo}        => undef,
     q{each @foo}        => 5.012,
     q{each $ref}        => 5.014,
+    q{each @foo; each $ref}        => 5.014,
+    q{each $foo; each @ref}        => 5.014,
     q{each $ref->call}  => 5.014,
     q{each call()}      => 5.014,
     q{each(%foo)}       => undef,
