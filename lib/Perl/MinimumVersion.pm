@@ -40,7 +40,7 @@ use strict;
 use version      ();
 use Carp         ();
 use Exporter     ();
-use List::Util   qw(max);
+use List::Util   qw(max first);
 use Params::Util ('_INSTANCE', '_CLASS');
 use PPI::Util    ('_Document');
 use PPI          ();
@@ -109,7 +109,7 @@ BEGIN {
 		_postfix_foreach        => version->new('5.004.05'),
 	);
 	@CHECKS_RV = ( #subs that return version
-	    '_feature_bundle','_regex','_each_argument',
+	    '_feature_bundle','_regex','_each_argument','_binmode_2_arg',
 	);
 
 	# Predefine some indexes needed by various check methods
@@ -610,6 +610,53 @@ sub _each_argument {
 	} );
 	return (defined($version)?"$version":undef, $obj);
 }
+
+#Is string (first argument) in list (other arguments)
+sub _str_in_list {
+	my $str = shift;
+	foreach my $s (@_) {
+		return 1 if $s eq $str;
+	}
+	return 0;
+}
+
+
+sub _binmode_2_arg {
+    my ($version, $obj);
+	shift->Document->find_first( sub {
+		my $main_element=$_[1];
+		$main_element->isa('PPI::Token::Word') or return '';
+		$main_element->content eq 'binmode'       or return '';
+		return '' if is_hash_key($main_element);
+		return '' if is_method_call($main_element);
+		return '' if is_subroutine_name($main_element);
+		return '' if is_included_module_name($main_element);
+		return '' if is_package_declaration($main_element);
+		my @arguments = parse_arg_list($main_element);
+		if ( scalar @arguments == 2 ) {
+		    my $arg2=$arguments[1][0];
+			if ( $arg2->isa('PPI::Token::Quote')) { #check second argument
+				my $str = $arg2->string;
+				$str =~ s/^\s+//s;
+				$str =~ s/\s+$//s;
+				$str =~ s/:\s+/:/g;
+				if ( !_str_in_list( $str => qw/:raw :crlf/) and $str !~ /[\$\@\%]/) {
+            		$version = 5.008;
+		            $obj = $main_element;
+					return 1;
+				}
+			}
+			if (!$version) {
+        	    $version = 5.006;
+	            $obj = $main_element;
+	        }
+		}
+		return '';
+	} );
+	return ($version, $obj);
+}
+
+
 
 sub _yada_yada_yada {
 	shift->Document->find_first( sub {

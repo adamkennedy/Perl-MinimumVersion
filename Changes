@@ -6,6 +6,7 @@ Revision history for Perl extension Perl-MinimumVersion
 	- Recognize all versions in "use feature" bundle (Alexandr Ciornii)
 	- Support regexes (Alexandr Ciornii)
 	- detect changes in each/keys/values in 5.12 and 5.14 (Yasutaka ATARASHI, Alexandr Ciornii)
+	- 2-arg binmode (Alexandr Ciornii)
 
 1.28 Wed  2 Mar 2011
 	- The ->isa in the 5.10 operator and magic variable tests were

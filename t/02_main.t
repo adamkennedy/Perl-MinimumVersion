@@ -8,7 +8,7 @@ BEGIN {
 	$^W = 1;
 }
 
-use Test::More tests => 109;
+use Test::More tests => 112;
 use version;
 use File::Spec::Functions ':ALL';
 use PPI;
@@ -305,7 +305,12 @@ s/\Fa//;
 END_PERL
 }
 
-
+#check binmode
+SCOPE: {
+my $v = version_is( <<'END_PERL', '5.8.0', '2-arg binmode with utf' );
+binmode($fh, ':utf');
+END_PERL
+}
 
 # test version_markers
 SCOPE: {
