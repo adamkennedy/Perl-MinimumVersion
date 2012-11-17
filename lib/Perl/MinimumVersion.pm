@@ -66,6 +66,7 @@ BEGIN {
 	%CHECKS = (
 		_yada_yada_yada         => version->new('5.012'),
 		_pkg_name_version       => version->new('5.012'),
+		_postfix_when           => version->new('5.012'),
 
 		_perl_5010_pragmas      => version->new('5.010'),
 		_perl_5010_operators    => version->new('5.010'),
@@ -657,6 +658,23 @@ sub _binmode_2_arg {
 }
 
 
+
+sub _postfix_when {
+	shift->Document->find_first( sub {
+		my $main_element=$_[1];
+		$main_element->isa('PPI::Token::Word') or return '';
+		$main_element->content eq 'when'    or return '';
+		return '' if is_hash_key($main_element);
+		return '' if is_method_call($main_element);
+		return '' if is_subroutine_name($main_element);
+		return '' if is_included_module_name($main_element);
+		return '' if is_package_declaration($main_element);
+		my $stmnt = $main_element->statement();
+		return '' if !$stmnt;
+		return '' if $stmnt->isa('PPI::Statement::When');
+		return 1;
+	} );
+}
 
 sub _yada_yada_yada {
 	shift->Document->find_first( sub {
