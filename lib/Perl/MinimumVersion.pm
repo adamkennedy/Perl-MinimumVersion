@@ -95,6 +95,7 @@ BEGIN {
 		_three_argument_open    => version->new('5.006'),
 		_weaken                 => version->new('5.006'),
 		_mkdir_1_arg            => version->new('5.006'),
+		_exists_subr            => version->new('5.006'),
 
 		_any_qr_tokens          => version->new('5.005.03'),
 		_perl_5005_pragmas      => version->new('5.005'),
@@ -657,6 +658,34 @@ sub _binmode_2_arg {
 	return ($version, $obj);
 }
 
+
+# exists(&subr) new in 5.6.0 #
+sub _exists_subr {
+	my ($pmv) = @_;
+	$pmv->Document->find_first(sub {
+		my ($document, $elem) = @_;
+		if ($elem->isa('PPI::Token::Word')
+			&& $elem eq 'exists'
+			&& is_function_call($elem)
+			&& ($elem = first_arg($elem))
+			&& _get_resulting_sigil($elem) eq '&') {
+				return 1;
+		} else {
+			return 0;
+		}
+	});
+}
+
+sub _get_resulting_sigil {
+	my $elem = shift;
+	if ($elem->isa('PPI::Token::Cast')) {
+		return $elem->content;
+	} elsif ($elem->isa('PPI::Token::Symbol')) {
+		return $elem->symbol_type;
+	} else {
+		return undef;
+	}
+}
 
 
 sub _postfix_when {
