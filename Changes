@@ -9,6 +9,7 @@ Revision history for Perl extension Perl-MinimumVersion
 	- 2-arg binmode (Alexandr Ciornii)
 	- postfix when (Alexandr Ciornii)
 	- exists(&sub) (Kevin Ryde, Alexandr Ciornii)
+	- _bugfix_magic_errno will return element (Alexandr Ciornii)
 
 1.28 Wed  2 Mar 2011
 	- The ->isa in the 5.10 operator and magic variable tests were

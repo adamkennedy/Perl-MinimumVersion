@@ -761,20 +761,21 @@ sub _perl_5008_pragmas {
 	} );
 }
 
-# FIXME: Needs to be upgraded to return something
+# 5.8.3: Reading $^E now preserves $!. Previously, the C code implementing $^E did not preserve errno, so reading $^E could cause errno and therefore $! to change unexpectedly.
 sub _bugfix_magic_errno {
 	my $Document = shift->Document;
-	$Document->find_any( sub {
+	my $element = $Document->find_first( sub {
 		$_[1]->isa('PPI::Token::Magic')
 		and
 		$_[1]->symbol eq '$^E'
-	} )
-	and
+	} ) || return undef;
+	#$^E is more rare than $!, so search for it first and return it
 	$Document->find_any( sub {
 		$_[1]->isa('PPI::Token::Magic')
 		and
 		$_[1]->symbol eq '$!'
-	} );
+	} ) || return '';
+	return $element;
 }
 
 # utf8::is_utf requires 5.8.1 unlike the rest of utf8

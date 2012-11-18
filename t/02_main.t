@@ -8,7 +8,7 @@ BEGIN {
 	$^W = 1;
 }
 
-use Test::More tests => 112;
+use Test::More tests => 116;
 use version;
 use File::Spec::Functions ':ALL';
 use PPI;
@@ -214,6 +214,15 @@ my $v = version_is( <<'END_PERL', '5.005', 'variables added in 5.5' );
 $! + $^R;
 END_PERL
 ok( $v->_5005_variables, '->_5005_variables returns true' );
+}
+
+
+# Check $^E + $!
+SCOPE: {
+my $v = version_is( <<'END_PERL', '5.008003', '$^E + $!' );
+$! + $^E;
+END_PERL
+is( $v->_bugfix_magic_errno->symbol, '$^E','->_bugfix_magic_errno returns $^E' );
 }
 
 
