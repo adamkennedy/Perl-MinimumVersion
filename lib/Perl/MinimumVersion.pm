@@ -133,6 +133,7 @@ BEGIN {
 			threads           => 1,
 			'threads::shared' => 1,
 			sort              => 1,
+			encoding          => 1,
 		},
 		_perl_5006_pragmas => {
 			warnings             => 1, #may be ported into older version
