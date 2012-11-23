@@ -11,7 +11,7 @@ Revision history for Perl extension Perl-MinimumVersion
 	- exists(&sub) (Kevin Ryde, Alexandr Ciornii)
 	- _bugfix_magic_errno will return element (Alexandr Ciornii)
 	- add 'encoding' to 5.8 pragmas (Alexandr Ciornii)
-	- private method _set_checks2skip for
+	- private methods _set_checks2skip and _set_collect_all_reasons for
 	  Perl::Critic::Policy::Compatibility::PerlMinimumVersionAndWhy (Alexandr Ciornii)
 
 1.28 Wed  2 Mar 2011

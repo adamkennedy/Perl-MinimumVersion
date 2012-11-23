@@ -416,6 +416,12 @@ sub _set_checks2skip {
 	my $list = shift;
 	$self->{_checks2skip} = $list;
 }
+sub _set_collect_all_reasons {
+	my $self = shift;
+	my $value = shift;
+	$value = 1 unless defined $value;
+	$self->{_collect_all_reasons} = $value;
+}
 
 sub _minimum_syntax_version {
 	my $self   = shift;
@@ -431,12 +437,16 @@ sub _minimum_syntax_version {
 		my ($v, $obj) = $self->$rule();
 		$v = version->new($v);
 		if ( $v > $filter ) {
-			$filter = $v;
 			$current_reason = Perl::MinimumVersion::Reason->new(
 				rule    => $rule,
 				version => $v,
 				element => _INSTANCE($obj, 'PPI::Element'),
 			);
+		    if ($self->{_collect_all_reasons}) {
+				push @{ $self->{_all_reasons} }, $current_reason;
+			} else {
+				$filter = $v;
+			}
 	    }
 	}
 
@@ -454,11 +464,17 @@ sub _minimum_syntax_version {
 		my $result = $self->$rule() or next;
 
 		# Create the result object
-		return Perl::MinimumVersion::Reason->new(
+		my $reason = Perl::MinimumVersion::Reason->new(
 			rule    => $rule,
 			version => $CHECKS{$rule},
 			element => _INSTANCE($result, 'PPI::Element'),
 		);
+		if ($self->{_collect_all_reasons}) {
+			push @{ $self->{_all_reasons} }, $current_reason;
+		} else {
+			return $reason;
+		}
+
 	}
 
 	# Found nothing of interest
