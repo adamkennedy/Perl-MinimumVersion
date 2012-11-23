@@ -8,7 +8,7 @@ BEGIN {
 	$^W = 1;
 }
 
-use Test::More tests => 116;
+use Test::More tests => 117;
 use version;
 use File::Spec::Functions ':ALL';
 use PPI;
@@ -347,5 +347,18 @@ for my $i (map { $_ * 2 } 0 .. $#result / 2) {
 }
 
 }
+
+#check _checks2skip
+SCOPE: {
+my $doc = PPI::Document->new(\'our $x;s/a//u;$^R;'); # requires 5.006 syntax
+my $minver = Perl::MinimumVersion->new($doc);
+$minver->_set_checks2skip([qw/_any_our_variables _regex/]);
+is(
+  $minver->minimum_syntax_version,
+  '5.005',
+  "5.6 checks not run when _checks2skip was used",
+);
+}
+
 
 1;

@@ -410,13 +410,24 @@ sub minimum_syntax_reason {
 	return '';
 }
 
+#for Perl::Critic::Policy::Compatibility::PerlMinimumVersionAndWhy
+sub _set_checks2skip {
+	my $self = shift;
+	my $list = shift;
+	$self->{_checks2skip} = $list;
+}
+
 sub _minimum_syntax_version {
 	my $self   = shift;
 	my $filter = shift || $self->{default};
 
+	my %checks2skip;
+	@checks2skip{ @{ $self->{_checks2skip} || [] } } = ();
+
 	my %rv_result;
 	my $current_reason;
 	foreach my $rule ( @CHECKS_RV ) {
+		next if exists $checks2skip{$rule};
 		my ($v, $obj) = $self->$rule();
 		$v = version->new($v);
 		if ( $v > $filter ) {
@@ -436,7 +447,7 @@ sub _minimum_syntax_version {
 	my @rules = sort {
 		$CHECKS{$b} <=> $CHECKS{$a}
 	} grep {
-		$CHECKS{$_} > $filter
+	    not(exists $checks2skip{$_}) and $CHECKS{$_} > $filter
 	} keys %CHECKS;
 
 	foreach my $rule ( @rules ) {
