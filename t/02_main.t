@@ -370,7 +370,7 @@ is(
   "correct version",
 );
 is(
-  scalar(@{$minver->{_all_reasons}}5),
+  scalar(@{ $minver->{_all_reasons} }),
   3,
   "3 checks met",
 );
