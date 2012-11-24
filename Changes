@@ -13,6 +13,7 @@ Revision history for Perl extension Perl-MinimumVersion
 	- add 'encoding' to 5.8 pragmas (Alexandr Ciornii)
 	- private methods _set_checks2skip and _set_collect_all_reasons for
 	  Perl::Critic::Policy::Compatibility::PerlMinimumVersionAndWhy (Alexandr Ciornii)
+	- temp file with open requires 5.8 (Alexandr Ciornii)
 
 1.28 Wed  2 Mar 2011
 	- The ->isa in the 5.10 operator and magic variable tests were
