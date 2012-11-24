@@ -33,4 +33,8 @@ sub element {
 	$_[0]->{element};
 }
 
+sub explanation {
+	$_[0]->{explanation};
+}
+
 1;
