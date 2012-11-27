@@ -387,7 +387,7 @@ sub minimum_syntax_reason {
 		$limit = version->new("$limit");
 	}
 	if ( defined $self->{syntax} ) {
-		if ( $self->{syntax}->version >= $limit ) {
+		if ( !defined($limit) or $self->{syntax}->version >= $limit ) {
 			# Previously discovered minimum is what they want
 			return $self->{syntax};
 		}
@@ -575,7 +575,7 @@ sub _feature_bundle {
 		foreach my $arg (@args) {
 		    my $v = 0;
 		    $v = $1 if ($arg->content =~ /:(5\.\d+)(?:\.\d+)?/);
-		    $v = max($1,5.16) if ($arg->content =~ /\barray_base\b/); #defined only in 5.16
+		    $v = max($v, 5.16) if ($arg->content =~ /\barray_base\b/); #defined only in 5.16
 			#
 			if ($v and $v > ($version || 0) ) {
 				$version = $v;
@@ -602,7 +602,7 @@ sub _regex {
 			}
 		return '';
 	} );
-	$version = undef if $version eq '5.000';
+	$version = undef if ($version and $version eq '5.000');
 	return ($version, $obj);
 }
 
@@ -636,7 +636,7 @@ sub _each_argument {
 				$obj = $_[1]->parent;
 			}
 		}
-		return 1 if $version == 5.014;
+		return 1 if ($version and $version == 5.014);
 		return '';
 	} );
 	return (defined($version)?"$version":undef, $obj);
@@ -716,7 +716,7 @@ sub _exists_subr {
 			&& $elem eq 'exists'
 			&& is_function_call($elem)
 			&& ($elem = first_arg($elem))
-			&& _get_resulting_sigil($elem) eq '&') {
+			&& (_get_resulting_sigil($elem) || '') eq '&') {
 				return 1;
 		} else {
 			return 0;
