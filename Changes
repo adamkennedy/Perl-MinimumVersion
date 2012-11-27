@@ -1,6 +1,6 @@
 Revision history for Perl extension Perl-MinimumVersion
 
-1.29 to be released
+1.29 Tue 27 Nov 2012
 	- "Use of uninitialized value in null operation" fix.
 	- Adding test for "utf8::is_utf" 5.8.1 special case
 	- Recognize all versions in "use feature" bundle (Alexandr Ciornii)

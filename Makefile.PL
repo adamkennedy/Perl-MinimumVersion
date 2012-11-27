@@ -1,4 +1,4 @@
-use inc::Module::Install::DSL 1.00;
+use inc::Module::Install::DSL 1.06;
 
 all_from       lib/Perl/MinimumVersion.pm
 requires       version                0.76

@@ -12,7 +12,7 @@ Perl::MinimumVersion - Find a minimum required version of perl for Perl code
   $object = Perl::MinimumVersion->new( $filename );
   $object = Perl::MinimumVersion->new( \$source  );
   $object = Perl::MinimumVersion->new( $ppi_document );
-  
+
   # Find the minimum version
   $version = $object->minimum_version;
 
@@ -34,9 +34,9 @@ covers it.
 
 =cut
 
-#use 5.006;
+use 5.006;
 use strict;
-#use warnings;
+use warnings;
 use version      ();
 use Carp         ();
 use Exporter     ();
