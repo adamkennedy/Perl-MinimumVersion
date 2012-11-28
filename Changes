@@ -1,6 +1,7 @@
 Revision history for Perl extension Perl-MinimumVersion
 
-    - 'each % { $foo }' incorrectly required perl 5.14
+    - 'each % { $foo }' incorrectly required perl 5.14 (RT#81505)
+    - 02_main.t fails in rare cases (RT#81487)
 
 1.29 Tue 27 Nov 2012
 	- "Use of uninitialized value in null operation" fix.

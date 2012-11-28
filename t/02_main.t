@@ -219,7 +219,7 @@ ok( $v->_5005_variables, '->_5005_variables returns true' );
 
 # Check $^E + $!
 SCOPE: {
-my $v = version_is( <<'END_PERL', '5.008003', '$^E + $!' );
+my $v = version_is( <<'END_PERL', '5.008.003', '$^E + $!' );
 $! + $^E;
 END_PERL
 is( $v->_bugfix_magic_errno->symbol, '$^E','->_bugfix_magic_errno returns $^E' );
@@ -274,7 +274,7 @@ use feature ':5.10';open A,'<','test.txt';
 END_PERL
 }
 SCOPE: {
-my $v = version_is( <<'END_PERL', '5.12.0', 'use feature :5.10 along with newer feature' );
+my $v = version_is( <<'END_PERL', '5.012', 'use feature :5.10 along with newer feature' );
 use feature ':5.10';
 sub foo { ... };
 END_PERL
@@ -287,7 +287,7 @@ m/a\z/
 END_PERL
 }
 SCOPE: {
-my $v = version_is( <<'END_PERL', '5.006.0', '\z along with newer feature' );
+my $v = version_is( <<'END_PERL', '5.006', '\z along with newer feature' );
 m/a\z/;open A,'<','test.txt';
 END_PERL
 }
@@ -316,7 +316,7 @@ END_PERL
 
 #check binmode
 SCOPE: {
-my $v = version_is( <<'END_PERL', '5.8.0', '2-arg binmode with utf' );
+my $v = version_is( <<'END_PERL', '5.008', '2-arg binmode with utf' );
 binmode($fh, ':utf');
 END_PERL
 }
