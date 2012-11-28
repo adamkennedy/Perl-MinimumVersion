@@ -1,5 +1,7 @@
 Revision history for Perl extension Perl-MinimumVersion
 
+    - 'each % { $foo }' incorrectly required perl 5.14
+
 1.29 Tue 27 Nov 2012
 	- "Use of uninitialized value in null operation" fix.
 	- Adding test for "utf8::is_utf" 5.8.1 special case
