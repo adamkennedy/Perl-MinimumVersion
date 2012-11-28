@@ -53,7 +53,7 @@ use Perl::MinimumVersion::Reason ();
 
 our ($VERSION, @ISA, @EXPORT_OK, %CHECKS, @CHECKS_RV ,%MATCHES);
 BEGIN {
-	$VERSION = '1.29';
+	$VERSION = '1.30';
 
 	# Only needed for dev releases, comment out otherwise
 	# $VERSION = eval $VERSION;

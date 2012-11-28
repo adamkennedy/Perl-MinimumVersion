@@ -16,7 +16,7 @@ perlver - The Perl Minimum Version Analyzer
   Scanning lib/Perl/MinimumVersion.pm... done
   Scanning t/01_compile.t... done
   Scanning t/02_main.t... done
-  
+
       ---------------------------------------------------------
     | file                       | explicit | syntax | external |
     | --------------------------------------------------------- |
@@ -24,9 +24,9 @@ perlver - The Perl Minimum Version Analyzer
     | t/01_compile.t             | ~        | ~      | n/a      |
     | t/02_main.t                | ~        | ~      | n/a      |
       ---------------------------------------------------------
-  
+
   Minimum version of Perl required: ...
-  
+
   adam@red:~$
 
 =head1 DESCRIPTION
@@ -59,7 +59,7 @@ sub dist           ($);
 
 use vars qw{$VERSION $VERBOSE $BLAME $EXPLAIN};
 BEGIN {
-	$VERSION = '1.29';
+	$VERSION = '1.30';
 
 	# Configuration globals
 	$VERBOSE = '';
@@ -420,7 +420,7 @@ L<PPI>, L<Perl::MinimumVersion>
 
 =head1 COPYRIGHT
 
-Copyright 2005 - 2011 Adam Kennedy.
+Copyright 2005 - 2012 Adam Kennedy.
 
 This program is free software; you can redistribute
 it and/or modify it under the same terms as Perl itself.
