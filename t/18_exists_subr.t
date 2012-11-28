@@ -21,6 +21,7 @@ my @examples_yes=(
     q{exists &a},
     q{exists(&a)},
     q{exists &$a},
+    #q{exists & $a}, #will implement someday
     q{exists(&$a)},
     q/exists &{$ref->{A}{B}{$key}}/,
 );
