@@ -1,5 +1,6 @@
 Revision history for Perl extension Perl-MinimumVersion
 
+1.31 Tue  4 Dec 2012
     - sort $subref requires perl 5.6 (Alexandr Ciornii)
 
 1.30 Wed 28 Nov 2012
