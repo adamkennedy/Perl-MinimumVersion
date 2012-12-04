@@ -1,5 +1,7 @@
 Revision history for Perl extension Perl-MinimumVersion
 
+    - sort $subref requires perl 5.6 (Alexandr Ciornii)
+
 1.30 Wed 28 Nov 2012
     - 'each % { $foo }' incorrectly required perl 5.14 (RT#81505)
     - 02_main.t fails in rare cases (RT#81487)

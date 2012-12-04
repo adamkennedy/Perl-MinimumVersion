@@ -97,6 +97,7 @@ BEGIN {
 		_weaken                 => version->new('5.006'),
 		_mkdir_1_arg            => version->new('5.006'),
 		_exists_subr            => version->new('5.006'),
+		_sort_subref            => version->new('5.006'),
 
 		_any_qr_tokens          => version->new('5.005.03'),
 		_perl_5005_pragmas      => version->new('5.005'),
@@ -689,6 +690,23 @@ sub _binmode_2_arg {
 	return ($version, $obj);
 }
 
+sub _sort_subref {
+	shift->Document->find_first( sub {
+		$_[1]->isa('PPI::Token::Word') or return '';
+		$_[1]->content eq 'sort' or return '';
+		is_function_call($_[1]) or return '';
+		my $e1 = $_[1]->next_sibling;
+		$e1->isa('PPI::Token::Whitespace') or return '';
+		$e1 = $e1->next_sibling;
+		_get_resulting_sigil($e1) || '' eq '$' or return '';
+		$e1 = $e1->next_sibling;
+		$e1->isa('PPI::Token::Whitespace') or return '';
+		$e1 = $e1->next_sibling;
+		$e1->isa('PPI::Token::Word') or $e1->isa('PPI::Token::Symbol')
+			or $e1->isa('PPI::Token::Cast') or $e1->isa('PPI::Structure::List') or return '';
+		return 1;
+	} );
+}
 
 sub _open_temp {
 	shift->Document->find_first( sub {
