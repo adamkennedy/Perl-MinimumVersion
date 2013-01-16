@@ -1,6 +1,7 @@
 Revision history for Perl extension Perl-MinimumVersion
 
     - require new version of PPIx::Regexp
+    - skip sub named keys/each/values in _each_argument() (Pedro Melo, RT#82718)
 
 1.31 Tue  4 Dec 2012
     - sort $subref requires perl 5.6 (Alexandr Ciornii)

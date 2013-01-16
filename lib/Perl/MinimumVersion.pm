@@ -633,6 +633,8 @@ sub _each_argument {
 			}
 		} elsif($next->isa('PPI::Token::Operator')) { # % $a
 			return '';
+		} elsif($_[1]->parent->isa('PPI::Statement::Sub')) { # sub each|keys|values
+			return '';
 		} else { # function call or other should be reference
 			if(5.014 > ($version || 0)) {
 				$version = 5.014;

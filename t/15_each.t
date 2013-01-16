@@ -29,6 +29,9 @@ my %examples=(
     q{each(call())}     => 5.014,
 
     q{keys %foo}        => undef,
+    q'sub keys;'        => undef,
+    q'sub keys {}'      => undef, # RT#82718
+    q{$obj->keys(@foo)} => undef,
     q{keys @foo}        => 5.012,
     q{keys $ref}        => 5.014,
     q{keys $ref->call}  => 5.014,
