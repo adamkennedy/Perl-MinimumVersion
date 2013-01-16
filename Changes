@@ -1,6 +1,6 @@
 Revision history for Perl extension Perl-MinimumVersion
 
-1.32
+1.32 Tue 16 Jan 2013
     - require new version of PPIx::Regexp
     - skip sub named keys/each/values in _each_argument() (Pedro Melo, RT#82718)
     - detect open with reference to scalar (Alexandr Ciornii)

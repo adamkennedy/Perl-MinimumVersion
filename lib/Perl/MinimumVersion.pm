@@ -53,7 +53,7 @@ use Perl::MinimumVersion::Reason ();
 
 our ($VERSION, @ISA, @EXPORT_OK, %CHECKS, @CHECKS_RV ,%MATCHES);
 BEGIN {
-	$VERSION = '1.31';
+	$VERSION = '1.32';
 
 	# Only needed for dev releases, comment out otherwise
 	# $VERSION = eval $VERSION;
@@ -1321,7 +1321,7 @@ L<http://ali.as/>, L<PPI>, L<version>
 
 =head1 COPYRIGHT
 
-Copyright 2005 - 2012 Adam Kennedy.
+Copyright 2005 - 2013 Adam Kennedy.
 
 This program is free software; you can redistribute
 it and/or modify it under the same terms as Perl itself.
