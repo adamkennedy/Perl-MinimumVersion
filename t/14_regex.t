@@ -13,7 +13,7 @@ my %examples=(
     q{s/\Ra//u} => '5.013010',
     q{m/a/} => undef,
     q{/(\?|I)/} => undef,
-    q{m xfoox} => undef, #unupported by PPIx::Regexp
+    q{m xfoox} => undef, #unsupported by PPIx::Regexp
     #q{/(\?>I)/} => undef,
     #q{/(\?:I)/} => undef,
     
