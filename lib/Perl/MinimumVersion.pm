@@ -82,6 +82,7 @@ BEGIN {
 		_local_soft_reference   => version->new('5.008'),
 		_use_carp_version       => version->new('5.008'),
 		_open_temp              => version->new('5.008'),
+		_open_scalar            => version->new('5.008'),
 
 		# Included in 5.6. Broken until 5.8
 		_pragma_utf8            => version->new('5.008'),
@@ -722,6 +723,25 @@ sub _open_temp {
 		if ( scalar @arguments == 3 and scalar(@{$arguments[2]}) == 1) {
 		    my $arg3 = $arguments[2][0];
 		    if ($arg3->isa('PPI::Token::Word') and $arg3->content eq 'undef') {
+				return 1;
+			}
+		}
+		return '';
+	} );
+}
+
+sub _open_scalar {
+	shift->Document->find_first( sub {
+		$_[1]->isa('PPI::Statement') or return '';
+		my @children = $_[1]->children;
+		#@children >= 7                or return '';
+		my $main_element = $children[0];
+		$main_element->isa('PPI::Token::Word') or return '';
+		$main_element->content eq 'open'       or return '';
+		my @arguments = parse_arg_list($main_element);
+		if ( scalar @arguments == 3) {
+		    my $arg3 = $arguments[2][0];
+		    if ($arg3->isa('PPI::Token::Cast') and $arg3->content eq '\\') {
 				return 1;
 			}
 		}
