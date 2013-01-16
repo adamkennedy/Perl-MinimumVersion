@@ -12,6 +12,11 @@ my %examples=(
     q{s#\Ra##} => '5.009005',
     q{s/\Ra//u} => '5.013010',
     q{m/a/} => undef,
+    q{/(\?|I)/} => undef,
+    q{m xfoox} => undef, #unupported by PPIx::Regexp
+    #q{/(\?>I)/} => undef,
+    #q{/(\?:I)/} => undef,
+    
 );
 plan tests => scalar(keys %examples);
 foreach my $example (sort keys %examples) {
