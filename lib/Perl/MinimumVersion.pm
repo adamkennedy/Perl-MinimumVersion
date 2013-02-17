@@ -67,6 +67,7 @@ BEGIN {
 		_yada_yada_yada         => version->new('5.012'),
 		_pkg_name_version       => version->new('5.012'),
 		_postfix_when           => version->new('5.012'),
+		_perl_5012_pragmas      => version->new('5.012'),
 
 		_perl_5010_pragmas      => version->new('5.010'),
 		_perl_5010_operators    => version->new('5.010'),
@@ -119,6 +120,9 @@ BEGIN {
 
 	# Predefine some indexes needed by various check methods
 	%MATCHES = (
+		_perl_5012_pragmas => {
+			deprecate => 1,
+		},
 		_perl_5010_pragmas => {
 			mro     => 1,
 			feature => 1,
@@ -691,6 +695,16 @@ sub _binmode_2_arg {
 		return '';
 	} );
 	return ($version, $obj);
+}
+
+
+
+sub _perl_5012_pragmas {
+	shift->Document->find_first( sub {
+		$_[1]->isa('PPI::Statement::Include')
+		and
+		$MATCHES{_perl_5012_pragmas}->{$_[1]->pragma}
+	} );
 }
 
 sub _sort_subref {
