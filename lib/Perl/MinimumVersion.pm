@@ -68,6 +68,7 @@ BEGIN {
 		_pkg_name_version       => version->new('5.012'),
 		_postfix_when           => version->new('5.012'),
 		_perl_5012_pragmas      => version->new('5.012'),
+		_while_readdir          => version->new('5.012'),
 
 		_perl_5010_pragmas      => version->new('5.010'),
 		_perl_5010_operators    => version->new('5.010'),
@@ -699,6 +700,35 @@ sub _binmode_2_arg {
 
 
 
+#http://perldoc.perl.org/functions/readdir.html
+#while(readdir $dh) requires perl 5.12
+sub _while_readdir {
+	shift->Document->find_first( sub {
+		$_[1]->isa('PPI::Token::Word') or return '';
+		$_[1]->content eq 'while' or return '';
+		return '' if is_hash_key($_[1]);
+		return '' if is_method_call($_[1]);
+		my $e1 = $_[1]->next_sibling or return '';
+		if ($e1->isa('PPI::Structure::Condition')) { #while ()
+			my @children = $e1->children;
+			$e1 = $children[0];
+		}
+		$e1->isa('PPI::Statement::Expression') or return '';
+		my @children = $e1->schildren;
+	    $e1 = $children[0];
+
+		$e1->isa('PPI::Token::Word') or return '';
+		$e1->content eq 'readdir' or return '';
+		return 1 if @children == 1; #incorrect call
+		return '' if @children > 2; #not only readdir
+		$e1 = $children[1];
+		$e1->isa('PPI::Structure::List') or $e1->isa('PPI::Token::Symbol') or return '';
+		#readdir($dh) or readdir $dh
+
+		return 1;
+	} );
+}
+
 sub _perl_5012_pragmas {
 	shift->Document->find_first( sub {
 		$_[1]->isa('PPI::Statement::Include')
@@ -1313,6 +1343,8 @@ B<Write lots more version checkers>
 B<Write the explicit version checker>
 
 B<Write the recursive module descend stuff>
+
+_while_readdir for postfix while without brackets
 
 B<Check for more 5.12 features (currently only detecting
 C<package NAME VERSION;>, C<...>, and C<use feature ':5.12'>)>
