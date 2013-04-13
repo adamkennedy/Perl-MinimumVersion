@@ -1,6 +1,7 @@
 Revision history for Perl extension Perl-MinimumVersion
 
     - deprecate.pm requires perl 5.12 (Alexandr Ciornii)
+    - require new version of PPIx::Regexp
 
 1.32 Tue 16 Jan 2013
     - require new version of PPIx::Regexp
