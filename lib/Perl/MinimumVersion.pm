@@ -570,6 +570,20 @@ sub version_markers {
 #####################################################################
 # Version Check Methods
 
+my %feature =
+(
+    'state'             => '5.10',
+    'switch'            => '5.10',
+    'unicode_strings'   => '5.14',
+    'unicode_eval'      => '5.16',
+    'evalbytes'         => '5.16',
+    'current_sub'       => '5.16',
+    'array_base'        => '5.16',
+    'fc'                => '5.16',
+    'lexical_subs'      => '5.18',
+);
+my $feature_regexp = join('|', keys %feature);
+
 #:5.14 means same as :5.12, but :5.14 is not defined in feature.pm in perl 5.12.
 sub _feature_bundle {
     my @versions;
@@ -582,7 +596,7 @@ sub _feature_bundle {
 		foreach my $arg (@args) {
 		    my $v = 0;
 		    $v = $1 if ($arg->content =~ /:(5\.\d+)(?:\.\d+)?/);
-		    $v = max($v, 5.16) if ($arg->content =~ /\barray_base\b/); #defined only in 5.16
+		    $v = max($v, $feature{$1}) if ($arg->content =~ /\b($feature_regexp)\b/);
 			#
 			if ($v and $v > ($version || 0) ) {
 				$version = $v;
