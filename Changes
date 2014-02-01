@@ -1,5 +1,6 @@
 Revision history for Perl extension Perl-MinimumVersion
 
+    - Internals::SvREADONLY requires perl 5.8.0
     - handle features upto lexical_subs, which requires 5.18.0
       state, switch, unicode_strings, unicode_eval, evalbytes,
       current_sub, array_base, fc, lexical_subs

@@ -65,6 +65,7 @@ BEGIN {
 	# The primary list of version checks
 	%CHECKS = (
 		_yada_yada_yada         => version->new('5.012'),
+		_internals_svreadonly   => version->new('5.008'),
 		_pkg_name_version       => version->new('5.012'),
 		_postfix_when           => version->new('5.012'),
 		_perl_5012_pragmas      => version->new('5.012'),
@@ -862,6 +863,14 @@ sub _yada_yada_yada {
 		if (@child == 2) {
 			$child[1]->isa('PPI::Token::Structure')
 		}
+	} );
+}
+
+sub _internals_svreadonly {
+	shift->Document->find_first( sub {
+		$_[1]->isa('PPI::Statement')
+        and ($_[1]->children)[0]->isa('PPI::Token::Word')
+        and ($_[1]->children)[0]->content eq 'Internals::SvREADONLY'
 	} );
 }
 
