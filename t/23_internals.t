@@ -6,18 +6,24 @@ use warnings;
 use Test::More;
 
 use Perl::MinimumVersion;
-my %examples=(
-    q{Internals::SvREADONLY($scalar, 1);} => '5.8.0',
-    q{Internals::SvREADONLY($scalar, 0);} => '5.8.0',
-    q{Internals::SvREADONLY(%hash, 1);}   => '5.8.0',
-    q{Internals::SvREADONLY(%hash, 0);}   => '5.8.0',
-    q{Internals::SvREADONLY(@array, 1);}  => '5.8.0',
-    q{Internals::SvREADONLY(@array, 0);}  => '5.8.0',
+my @examples_not=(
+    q'print "Internals::SvREADONLY"',
+    q'defined &Internals::SvREADONLY',
 );
-plan tests => scalar(keys %examples);
-foreach my $example (sort keys %examples) {
+my @examples_yes=(
+    q'Internals::SvREADONLY($scalar, 1);',
+    q'Internals::SvREADONLY(%hash, 1);',
+);
+plan tests =>(@examples_not+@examples_yes);
+my $method='_internals_svreadonly';
+foreach my $example (@examples_not) {
 	my $p = Perl::MinimumVersion->new(\$example);
-    my $v = $p->minimum_version;
-	is( $v, $examples{$example}, $example )
+	is( $p->$method, '', $example )
 	  or do { diag "\$\@: $@" if $@ };
 }
+foreach my $example (@examples_yes) {
+	my $p = Perl::MinimumVersion->new(\$example);
+	ok( $p->$method, "$example - detected")
+	  or do { diag "\$\@: $@" if $@ };
+}
+

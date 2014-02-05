@@ -65,7 +65,6 @@ BEGIN {
 	# The primary list of version checks
 	%CHECKS = (
 		_yada_yada_yada         => version->new('5.012'),
-		_internals_svreadonly   => version->new('5.008'),
 		_pkg_name_version       => version->new('5.012'),
 		_postfix_when           => version->new('5.012'),
 		_perl_5012_pragmas      => version->new('5.012'),
@@ -86,6 +85,7 @@ BEGIN {
 		_use_carp_version       => version->new('5.008'),
 		_open_temp              => version->new('5.008'),
 		_open_scalar            => version->new('5.008'),
+		_internals_svreadonly   => version->new('5.008'),
 
 		# Included in 5.6. Broken until 5.8
 		_pragma_utf8            => version->new('5.008'),
