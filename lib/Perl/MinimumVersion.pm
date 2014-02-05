@@ -579,7 +579,7 @@ my %feature =
     'unicode_eval'      => '5.16',
     'evalbytes'         => '5.16',
     'current_sub'       => '5.16',
-    'array_base'        => '5.16',
+    'array_base'        => '5.16', #defined only in 5.16
     'fc'                => '5.16',
     'lexical_subs'      => '5.18',
 );
